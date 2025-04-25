@@ -1,0 +1,23 @@
+# core PDF processing
+PyPDF2==3.0.1
+PyMuPDF==1.25.5
+
+# OCR and image processing
+paddlepaddle==3.0.0
+paddleocr==2.10.0
+Pillow==11.2.1  # required by paddleocr for image processing
+
+# scientific computing
+numpy==2.2.4
+
+# additional dependencies required by paddleOCR
+opencv-python-headless==4.11.0.86
+pyclipper==1.3.0.post6
+shapely==2.1.0
+rapidfuzz==3.13.0
+scikit-image==0.25.2
+lmdb==1.6.2
+tqdm>=4.67.1  # progress bars lol
+
+# text processing
+langchain-text-splitters==0.3.8  # for text chunking using LangChain
