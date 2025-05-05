@@ -1,43 +1,60 @@
-from sentence_transformers import CrossEncoder
-import torch
-import numpy as np
+import argparse
+from pymilvus import MilvusClient
+from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, NVIDIARerank
+from langchain_core.documents import Document
+from dotenv import load_dotenv
+import os
 
-def rerank_chunks(
-    query,
-    chunks,
-    model_name='cross-encoder/nli-deberta-v3-base',
-    top_n=5,
-    device='cuda' if torch.cuda.is_available() else 'cpu',
-    verbose=True
-):
-    
-    reranker = CrossEncoder(model_name, device=device)
-    pairs = []
-    for chunk in chunks:
-        text = chunk['text']
-        pair = (query, text)
-        pairs.append(pair)
+load_dotenv()
 
-    scores = reranker.predict(pairs)
+EMBEDDING_API_KEY = os.getenv("NVIDIA_EMBEDDING_API_KEY")
+RERANKER_API_KEY = os.getenv("NVIDIA_RERANKER_API_KEY")
+MILVUS_DB_PATH = "milvus_lite.db"
+COLLECTION_NAME = "risk_chunks"
+VECTOR_DIM = 4096  
 
-    for chunk, score in zip(chunks, scores):
-        if isinstance(score, (list, np.ndarray)):
-            base_score = float(score[0])
-        else:
-            base_score = float(score)
+def search_milvus(query, top_k=10):
+    print(query)
+    client = MilvusClient(uri=MILVUS_DB_PATH)
 
-        reason = []
+    embedder = NVIDIAEmbeddings(
+        model="nvidia/llama-3.2-nv-embedqa-1b-v2",
+        api_key=EMBEDDING_API_KEY,  
+        truncate="NONE"
+    )
+    query_vec = embedder.embed_query(query)
 
-        chunk['rerank_score'] = base_score
-        chunk['rerank_reason'] = ", ".join(reason)
+    res = client.search(
+        collection_name=COLLECTION_NAME,
+        data=[query_vec],
+        limit=top_k,
+        output_fields=["text"]
+    )
+    return [hit["entity"]["text"] for hit in res[0]]
 
-    reranked = sorted(chunks, key=lambda x: -x['rerank_score'])
-    top_chunks = reranked[:top_n]
+def rerank(query, passages, top_n=5):
+    client = NVIDIARerank(
+        model="nvidia/llama-3.2-nv-rerankqa-1b-v2",
+        api_key=RERANKER_API_KEY,  
+    )
 
-    if verbose:
-        print(f"\nTop {top_n} Reranked Chunks for Query: \"{query}\"\n")
-        for i, chunk in enumerate(top_chunks):
-            print(f"Rank {i+1} | Score: {chunk['rerank_score']:.4f}")
-            print(f"→ {chunk['text'].strip()}\n")
+    documents = [Document(page_content=p) for p in passages]
+    results = client.compress_documents(query=query, documents=documents)
+    return [doc.page_content for doc in results[:top_n]]
 
-    return top_chunks
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--query", required=True, help="Search query")
+    parser.add_argument("--top_k", type=int, default=10, help="Top K retrieved from Milvus")
+    parser.add_argument("--top_n", type=int, default=5, help="Top N reranked chunks")
+    args = parser.parse_args()
+
+    retrieved = search_milvus(args.query, args.top_k)
+    top_chunks = rerank(args.query, retrieved, args.top_n)
+
+    print("\nTOP RERANKED CHUNKS:")
+    for i, chunk in enumerate(top_chunks, 1):
+        print(f"\nRank {i}:\n{chunk[:500]}...\n")
+
+if __name__ == "__main__":
+    main()
