@@ -1,107 +1,57 @@
 """
-json_to_db.py 
-Convert an Unstructured‑style JSON file into a compact SQLite database while preserving every field.
-Use pdf_to_json.py first to convert a PDF into a JSON file.
-
-The input JSON must be an *array* of objects that look like:
-
-{
-  "type": "CompositeElement",
-  "element_id": "…",
-  "text": "…",
-  "metadata": {
-      "filename": "…",
-      "filetype": "…",
-      "languages": ["eng"],
-      "page_number": 1,
-      "text_as_html": "…"
-  }
-}
-
-Each record is flattened into eight columns:
-
-    type, element_id, text,
-    filename, filetype, languages, page_number, text_as_html
+new_json_to_db.py
+--------------------
+Flatten an Unstructured‑style JSON array (one‑level: top + metadata) into
+a single SQLite table called `elements`.
 
 Usage
 -----
-$ python json_to_db.py path/to/file.json  -o out.db
+$ python simple_json_to_db.py source.json  -o output.db
 """
 
 from __future__ import annotations
-import argparse
-import json
-import sqlite3
-import sys
+import argparse, json, os, sqlite3
 from pathlib import Path
+from typing import Any, Dict, List
+
+import pandas as pd
 
 
-def flatten(entry: dict) -> dict:
-    """Pull metadata fields up one level so we can insert a simple row."""
-    meta = entry.get("metadata", {})
-    return {
-        "type": entry.get("type"),
-        "element_id": entry.get("element_id"),
-        "text": entry.get("text"),
-        "filename": meta.get("filename"),
-        "filetype": meta.get("filetype"),
-        # store the language list as a JSON string to keep the array intact
-        "languages": json.dumps(meta.get("languages", [])),
-        "page_number": meta.get("page_number"),
-        "text_as_html": meta.get("text_as_html", ""),
-    }
-
-
-DDL = """
-CREATE TABLE IF NOT EXISTS elements (
-    element_id    TEXT PRIMARY KEY,
-    type          TEXT,
-    text          TEXT,
-    filename      TEXT,
-    filetype      TEXT,
-    languages     TEXT,
-    page_number   INTEGER,
-    text_as_html  TEXT
-);
-"""
+def flatten(record: Dict[str, Any]) -> Dict[str, Any]:
+    """Pull `metadata` keys up one level; JSON‑encode lists/dicts."""
+    rec = record.copy()
+    meta = rec.pop("metadata", {})
+    for k, v in meta.items():
+        if isinstance(v, (list, dict)):
+            v = json.dumps(v, ensure_ascii=False)
+        rec[k] = v
+    return rec
 
 
 def json_to_db(json_path: Path, db_path: Path) -> None:
-    with json_path.open(encoding="utf-8") as fp:
-        data = json.load(fp)
-    if not isinstance(data, list):
-        sys.exit("❌  Top‑level JSON is not an array; aborting.")
+    if db_path.exists():
+        db_path.unlink()            # start fresh
 
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    cur.executescript(DDL)
+    with json_path.open(encoding="utf‑8") as fp:
+        data: List[Dict[str, Any]] = json.load(fp)
 
-    rows = [flatten(rec) for rec in data]
-    cur.executemany(
-        """
-        INSERT OR REPLACE INTO elements
-        (element_id, type, text, filename, filetype, languages, page_number, text_as_html)
-        VALUES (:element_id, :type, :text, :filename, :filetype, :languages, :page_number, :text_as_html)
-        """,
-        rows,
-    )
-    conn.commit()
-    conn.close()
-    print(f"✅  Wrote {len(rows)} rows to {db_path.resolve()}")
+    rows = [flatten(r) for r in data]
+    df = pd.DataFrame(rows)
+
+    with sqlite3.connect(db_path) as conn:
+        df.to_sql("elements", conn, index=False)
+
+    print(f"✅  Wrote {len(df)} rows and {len(df.columns)} columns → {db_path.resolve()}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Convert JSON → SQLite .db")
-    parser.add_argument("json_path", type=Path, help="Path to source .json file")
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=Path,
-        metavar="DB",
-        default=Path("output.db"),
+    p = argparse.ArgumentParser(description="Flatten JSON → SQLite")
+    p.add_argument("json_path", type=Path, help="Source .json file")
+    p.add_argument(
+        "-o", "--output", type=Path, default=Path("output.db"),
         help="Destination .db file (default: ./output.db)",
     )
-    args = parser.parse_args()
+    args = p.parse_args()
     json_to_db(args.json_path, args.output)
 
 
