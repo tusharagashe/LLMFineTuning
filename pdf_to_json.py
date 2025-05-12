@@ -1,7 +1,7 @@
 """
-pdf_to_json.py (test)
---------------
+pdf_to_json.py 
 This script helps you turn a PDF into one JSON object per page using the Unstructured.io API.
+Need a Unstructured.io API key to run this script (text me or make a free account)
 
 You can use it directly in Python scripts or notebooks, or just run it from the command line.
 
@@ -11,7 +11,6 @@ Example usage in Python:
 --- Not postive the remove_text is working properly BE WARNED!
 
 Parameters
-----------
 pdf_path : str | pathlib.Path
     Path to the PDF file you want to process.
 strategy : {"hi_res", "vlm", "ocr_only"}, default "hi_res"
@@ -27,7 +26,6 @@ extract_images : bool, default True
     If True, grabs images from the PDF and includes them as base64-encoded PNGs.
 
 Returns
--------
 pathlib.Path
     The path to the final JSON file so you know where to find it.
 """
