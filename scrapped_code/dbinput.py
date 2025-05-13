@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# userinput.py
-
 import sqlite3
 import os
 import argparse

@@ -1,58 +1,91 @@
-import argparse
 import os
+import argparse
 from dotenv import load_dotenv
 from pymilvus import MilvusClient
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, NVIDIARerank
 from langchain_core.documents import Document
 
-# Load API keys from .env
 load_dotenv()
 EMBEDDING_API_KEY = os.getenv("NVIDIA_EMBEDDING_API_KEY")
 RERANKER_API_KEY = os.getenv("NVIDIA_RERANKER_API_KEY")
 
-def search_milvus(query, milvus_db, collection_name, top_k=10):
-    print(milvus_db, collection_name)
+def search_milvus(query: str, milvus_db: str, collection_name: str, top_k: int = 10):
     client = MilvusClient(uri=milvus_db, local=True)
+
+    if not client.has_collection(collection_name=collection_name):
+        existing = client.list_collections()
+        raise RuntimeError(
+            f"Collection {collection_name!r} not found in {milvus_db!r}.\n"
+            f"Existing collections: {existing}"
+        )
 
     embedder = NVIDIAEmbeddings(
         model="nvidia/llama-3.2-nv-embedqa-1b-v2",
         api_key=EMBEDDING_API_KEY,
-        truncate="NONE"
+        truncate="NONE",
     )
-    query_vec = embedder.embed_query(query)
+    qvec = embedder.embed_query(query)
 
-    res = client.search(
+    results = client.search(
         collection_name=collection_name,
-        data=[query_vec],
+        data=[qvec],
         limit=top_k,
-        output_fields=["text"]
+        output_fields=["text"],
     )
-    return [hit["entity"]["text"] for hit in res[0]]
+    return [hit.entity.get("text") for hit in results[0]]
 
-def rerank(query, passages, top_n=5):
+def rerank(query: str, passages: list[str], top_n: int = 5):
+    print(len(passages))
     client = NVIDIARerank(
         model="nvidia/llama-3.2-nv-rerankqa-1b-v2",
         api_key=RERANKER_API_KEY,
     )
     docs = [Document(page_content=p) for p in passages]
     ranked = client.compress_documents(query=query, documents=docs)
-    return [doc.page_content for doc in ranked[:top_n]]
+    return [d.page_content for d in ranked[:top_n]]
 
 def main():
-    parser = argparse.ArgumentParser(description="function to retrieve and rerank passages from a Milvus Lite DB.")
-    parser.add_argument("--db", required=True, help="path to Milvus Lite DB file")
-    parser.add_argument("--collection", default="risk_chunks", help="Milvus collection name to search, should all be called risk_chunks")
-    parser.add_argument("--query", required=True, help="search query string")
-    parser.add_argument("--top_k", type=int, default=10, help="num of chunks to retrieve from Milvus")
-    parser.add_argument("--top_n", type=int, default=5, help="num of top passages to return after reranking")
+    parser = argparse.ArgumentParser(
+        description="Retrieve + rerank passages from a Milvus-Lite DB using NVIDIA NIMs"
+    )
+    parser.add_argument(
+        "--db",
+        required=True,
+        help="Path to your Milvus-Lite .db file (e.g. db/foo_milvus.db)",
+    )
+    parser.add_argument(
+        "--collection",
+        default="risk_chunks",
+        help="Milvus collection name to search (default 'risk_chunks')",
+    )
+    parser.add_argument("--query", required=True, help="Search query")
+    parser.add_argument(
+        "--top_k",
+        type=int,
+        default=10,
+        help="How many passages to retrieve before reranking",
+    )
+    parser.add_argument(
+        "--top_n",
+        type=int,
+        default=5,
+        help="How many to return after reranking",
+    )
     args = parser.parse_args()
 
-    retrieved = search_milvus(args.query, args.db, args.collection, args.top_k)
-    top_chunks = rerank(args.query, retrieved, args.top_n)
+    # step 1 w/ searching thru milvus
+    passages = search_milvus(args.query, args.db, args.collection, top_k=args.top_k)
+#   if not passages:
+#       return
 
-    print("\nTop Reranked Chunks:")
-    for idx, chunk in enumerate(top_chunks, 1):
-        print(f"\nRank {idx}:\n{chunk[:500]}...\n")
+    # rerank w/ nim
+    top_chunks = rerank(args.query, passages, top_n=args.top_n)
+
+    # output
+    print("\nTOP RERANKED CHUNKS\n")
+    for i, chunk in enumerate(top_chunks, start=1):
+        print(f"RANK {i}")
+        print(chunk[:1000], "...\n")
 
 if __name__ == "__main__":
     main()
