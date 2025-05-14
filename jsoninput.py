@@ -35,8 +35,8 @@ def load_and_introspect(json_path):
 
 def populate_and_export(json_path):
     data, id_key, text_key, meta_keys = load_and_introspect(json_path)
-    #print(f"Loaded {len(data)} entries; id_key={id_key}, text_key='{text_key}', metadata={meta_keys}")
-    print(len(data), id_key, text_key, meta_keys)
+    #print(len(data), id_key, text_key, meta_keys)
+    print(f"Loaded {len(data)} entries; id_key={id_key}, text_key='{text_key}', metadata={meta_keys}")
 
     base = Path(json_path).stem
     milvus_db_name = make_milvus_name(base)
@@ -97,7 +97,7 @@ def populate_and_export(json_path):
         json.dump(out, f, indent=2)
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(description="Ingest JSON to Milvus Lite w/ export JSON")
-    p.add_argument("--json", required=True, help="Path to input JSON file")
+    p = argparse.ArgumentParser(description="JSON to Milvus Lite w/ export JSON to make sure it worked")
+    p.add_argument("--json", required=True, help="path to input JSON file")
     args = p.parse_args()
     populate_and_export(args.json)

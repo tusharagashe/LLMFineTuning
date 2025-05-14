@@ -46,30 +46,30 @@ def rerank(query: str, passages: list[str], top_n: int = 5):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Retrieve + rerank passages from a Milvus-Lite DB using NVIDIA NIMs"
+        description="retrieve + rerank passages from a Milvus-Lite DB using NVIDIA NIMs"
     )
     parser.add_argument(
         "--db",
         required=True,
-        help="Path to your Milvus-Lite .db file (e.g. db/foo_milvus.db)",
+        help="Path to milvus .db file",
     )
     parser.add_argument(
         "--collection",
         default="risk_chunks",
-        help="Milvus collection name to search (default 'risk_chunks')",
+        help="milvus collection name to search, default is set to 'risk_chunks'",
     )
     parser.add_argument("--query", required=True, help="Search query")
     parser.add_argument(
         "--top_k",
         type=int,
         default=10,
-        help="How many passages to retrieve before reranking",
+        help="how many passages to retrieve before reranking",
     )
     parser.add_argument(
         "--top_n",
         type=int,
         default=5,
-        help="How many to return after reranking",
+        help="how many to return after reranking",
     )
     args = parser.parse_args()
 
@@ -81,10 +81,11 @@ def main():
     # rerank w/ nim
     top_chunks = rerank(args.query, passages, top_n=args.top_n)
 
-    # output
+    # output, only prints out the first 1000 chars of each chunk 
     print("\nTOP RERANKED CHUNKS\n")
     for i, chunk in enumerate(top_chunks, start=1):
         print(f"RANK {i}")
+        #print(chunk, "...\n")
         print(chunk[:1000], "...\n")
 
 if __name__ == "__main__":
