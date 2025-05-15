@@ -1,34 +1,35 @@
+#!/usr/bin/env python3
 """
 pdf_to_json.py 
-This script helps you turn a PDF into one JSON object per page using the Unstructured.io API.
-Need a Unstructured.io API key to run this script (text me or make a free account)
+--------------------------
+Convert a PDF into one **CompositeElement** JSON object per page using the Unstructured.io partition API.
 
-You can use it directly in Python scripts or notebooks, or just run it from the command line.
 
 Example usage in Python:
 >>> from pdf_to_json import pdf_to_json
 >>> pdf_to_json("myfile.pdf", strategy="vlm", remove_text="some footer")
---- Not postive the remove_text is working properly BE WARNED!
 
 Parameters
+----------
 pdf_path : str | pathlib.Path
-    Path to the PDF file you want to process.
+    Path to the source PDF.
 strategy : {"hi_res", "vlm", "ocr_only"}, default "hi_res"
-    Choose how to process the PDF:
-    - "hi_res" for high-res layout parsing
-    - "vlm" for vision-language model support
-    - "ocr_only" if your PDF is just scanned text
+    Unstructured partition strategy.
 remove_text : str | None, optional
-    Any text (like headers or footers) that repeats on every page—pass it here to strip it out.
+    String or regex pattern that appears on *every* page and should be stripped
+    before the JSON is written (e.g., repeating headers/footers). If *None*, no
+    extra stripping is applied.
 output_path : str | pathlib.Path | None, optional
-    Where to save the JSON output. If you don't set this, it'll save as `<pdf>.json` in the same folder.
+    Where to write the JSON. Defaults to `<pdf>.json` in the same directory.
 extract_images : bool, default True
-    If True, grabs images from the PDF and includes them as base64-encoded PNGs.
+    Whether to include embedded images from the PDF (saved as base‑64 PNG strings).
 
 Returns
+-------
 pathlib.Path
-    The path to the final JSON file so you know where to find it.
+    The absolute path to the generated JSON file.
 """
+
 from __future__ import annotations
 import argparse, json, os, re, uuid
 from collections import OrderedDict
@@ -38,10 +39,10 @@ from typing import Any, Dict, List, Optional, Set
 from unstructured_client import UnstructuredClient
 from unstructured_client.models.shared import Files, Strategy
 
-# helpers
+#  helpers 
 
 def _element_to_dict(el: Any) -> Dict[str, Any]:
-    """Normalise Unstructured element -> plain dict."""
+    """Normalise Unstructured element → plain dict."""
     if isinstance(el, dict):
         return el
     if hasattr(el, "model_dump"):  # pydantic v2
@@ -49,7 +50,6 @@ def _element_to_dict(el: Any) -> Dict[str, Any]:
     if hasattr(el, "dict"):  # pydantic v1
         return el.dict(by_alias=True)
     import dataclasses
-
     if dataclasses.is_dataclass(el):
         return dataclasses.asdict(el)
     return json.loads(str(el))
@@ -62,7 +62,7 @@ def _strip_header(text: str, header_re: Optional[re.Pattern[str]]) -> str:
     return header_re.sub("", text, count=1).lstrip()
 
 
-# core
+# core 
 
 def pdf_to_json(
     pdf_path: str | Path,
@@ -76,7 +76,7 @@ def pdf_to_json(
 
     pdf_path = Path(pdf_path).expanduser().resolve()
     if not pdf_path.exists():
-            raise FileNotFoundError(pdf_path)
+        raise FileNotFoundError(pdf_path)
 
     if output_path is None:
         output_path = pdf_path.with_suffix(".json")
@@ -143,22 +143,22 @@ def pdf_to_json(
         langs: Set[str] = set(d.get("metadata", {}).get("languages") or [])
         pages[page_no]["languages"].update(langs)
 
-    # build one CompositeElement per page
+    #  build one CompositeElement per page 
     combined: List[Dict[str, Any]] = []
     for page_no, bundle in pages.items():
         combined.append(
-            {
-                "type": "CompositeElement",
-                "element_id": uuid.uuid4().hex,
-                "text": "\n".join(bundle["texts"]).strip(),
-                "metadata": {
-                    "filename": bundle["filename"],
-                    "filetype": bundle["filetype"],
-                    "languages": sorted(bundle["languages"]),
-                    "page_number": page_no,
-                    "text_as_html": "<br/>\n".join(bundle["htmls"]).strip(),
-                },
-            }
+            OrderedDict([
+                ("type", "CompositeElement"),
+                ("element_id", uuid.uuid4().hex),
+                ("text", "\n".join(bundle["texts"]).strip()),
+                ("metadata", OrderedDict([
+                    ("text_as_html", "<br/>\n".join(bundle["htmls"]).strip()),
+                    ("languages", sorted(bundle["languages"])),
+                    ("filename", bundle["filename"]),
+                    ("filetype", bundle["filetype"]),
+                    ("page_number", page_no),
+                ])),
+            ])
         )
 
     output_path.write_text(json.dumps(combined, indent=2, ensure_ascii=False))
@@ -166,9 +166,8 @@ def pdf_to_json(
     return output_path
 
 
-#  CLI wrapper 
-
-def _main() -> None:  
+# CLI wrapper 
+def _main() -> None:
     p = argparse.ArgumentParser(description="PDF → one CompositeElement per page.")
     p.add_argument("pdf", type=Path, help="Source PDF file")
     p.add_argument("-o", "--output", type=Path, help="Output JSON (default: <pdf>.json)")
@@ -194,5 +193,5 @@ def _main() -> None:
     )
 
 
-if __name__ == "__main__":  
+if __name__ == "__main__":
     _main()
