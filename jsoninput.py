@@ -9,7 +9,7 @@ from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 load_dotenv()  
 EMBED_KEY = os.getenv("NVIDIA_EMBEDDING_API_KEY")
 
-# makes sure Milvus DB filename is <=35 characters bc milvus db filename limit is @ 35 lul
+# makes sure Milvus DB filename is <=35 characters bc milvus db filename limit is @ 35
 def make_milvus_name(base: str, suffix="_milvus.db", max_len=35) -> str:
     candidate = base + suffix
 
