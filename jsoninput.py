@@ -40,9 +40,9 @@ def populate_and_export(json_path):
 
     base = Path(json_path).stem
     milvus_db_name = make_milvus_name(base)
-    milvus_db = Path("db") / milvus_db_name
+    milvus_db = Path("milvusdb") / milvus_db_name
     collection = "risk_chunks"
-    export_file = Path("db/json") / f"{base}_export.json"
+    export_file = Path("milvusdb/json") / f"{base}_export.json"
     milvus_db.parent.mkdir(parents=True, exist_ok=True)
     export_file.parent.mkdir(parents=True, exist_ok=True)
 
