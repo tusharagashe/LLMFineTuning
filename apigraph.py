@@ -3,12 +3,18 @@ from langgraph.graph import StateGraph, START, END
 from langsmith import traceable
 import requests 
 
-#need to update later to generally fit all api responses/integrate with larger workflow. 
+# need to update later to generally fit all api responses/integrate with larger workflow. 
 # possibly have larger object that is passed through whole workflow 
 class State(TypedDict):
     drug: str
     api_data: dict
     adverse_events: list
+    
+# call this function from our routing llm logic 
+def get_raw_fda_data(drug: str) -> dict:
+    state = {"drug": drug}
+    result = graph.invoke(state)
+    return result
 
 @traceable(name="FDA Adverse Events Endpoint")
 def fetch_adverse_events(state: State) -> dict:
@@ -47,13 +53,6 @@ graph_builder.add_edge(START, "fetch_api")
 graph_builder.add_edge("fetch_api", END)
 graph = graph_builder.compile()
 
-
-def get_raw_fda_data(drug: str) -> dict:
-    state = {"drug": drug}
-    result = graph.invoke(state)
-    return result
-
-
 if __name__ == "__main__":
-    result = get_raw_fda_data("metformin")
+    result = get_raw_fda_data("tylenol")
     print(result["adverse_events"])
