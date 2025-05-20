@@ -1,4 +1,3 @@
-from _constants import LLM_CONFIGS, SYSTEM_MESSAGES
 from IPython.display import Image, display
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
@@ -9,6 +8,14 @@ from langgraph.graph import END, START, StateGraph
 from langsmith import traceable
 from pydantic import BaseModel, Field
 from typing_extensions import Literal, TypedDict
+
+from LLMFineTuning.src._constants import (
+    LLM_CONFIGS,
+    PROPOSAL_WRITER_SYSTEM_MESSAGE,
+    RISK_ASSESSMENT_SYSTEM_MESSAGE,
+    RISK_CRITQUE_SYSTEM_MESSAGE,
+    SYSTEM_MESSAGES,
+)
 
 
 # Graph state
@@ -36,8 +43,6 @@ class Workflow:
         self.llm = ChatOllama(model=LLM_CONFIGS["llama3.2"]["model"])
         self.evaluator = self.llm.with_structured_output(Feedback)
 
-    # 3. Agent Functions
-    @traceable(name="Evidence retreiver from database")
     def evidence_retriever(self, state: State, config: RunnableConfig):
         """Retrieve evidence from vector database of related successful and failed trials."""
         # TODO: Vector DB call based on state.proposal
@@ -48,10 +53,10 @@ class Workflow:
         # state.history.append("Retrieved evidence from vector DB")
         return {"retrieved_evidence": evidence}
 
-    @traceable(name="FDA Risk Assessment")
     def risk_assessment(self, state: State, config: RunnableConfig):
         """First LLM call to provide a risk assessment of the user proposal"""
-        risk_assessment_system_message = SYSTEM_MESSAGES["risk_assessment"]
+        # risk_assessment_system_message = SYSTEM_MESSAGES["risk_assessment"]
+        risk_assessment_system_message = RISK_ASSESSMENT_SYSTEM_MESSAGE
 
         if state.get("improved_proposal"):
             grade = self.evaluator.invoke(
@@ -85,13 +90,16 @@ class Workflow:
     #         return "Fail"
     #     return "Fail"
 
-    @traceable(name="FDA Risk Critquer")
     def regulatory_risk_critquer(self, state: State, config: RunnableConfig):
         """Second LLM call to provide specific feedback based on different categories of regulatory approval to improve the rating."""
 
+        # risk_critique_system_message = SYSTEM_MESSAGES["risk_critiquer"]
+
+        risk_critique_system_message = RISK_CRITQUE_SYSTEM_MESSAGE
+
         msg = self.llm.invoke(
             [
-                SystemMessage(content=SYSTEM_MESSAGES["risk_critiquer"]),
+                SystemMessage(content=risk_critique_system_message),
                 HumanMessage(
                     content=f"Here is the original proposal: {state['user_proposal']}. Here is the risk assessment \
                     and rating: {state['risk_assessment_and_rating']}"
@@ -101,13 +109,14 @@ class Workflow:
         )
         return {"proposal_feedback": msg.content}
 
-    @traceable(name="FDA Proposal Rewriter")
     def proposal_writer(self, state: State, config: RunnableConfig):
         """Third LLM call for writing a new proposal based on feedback."""
+        # proposal_writer_sys_message = SYSTEM_MESSAGES["proposal_writer"]
+        proposal_writer_sys_message = PROPOSAL_WRITER_SYSTEM_MESSAGE
 
         msg = self.llm.invoke(
             [
-                SystemMessage(content=SYSTEM_MESSAGES["proposal_writer"]),
+                SystemMessage(content=proposal_writer_sys_message),
                 HumanMessage(
                     content=f"Here is the original proposal: {state['user_proposal']}. Here is the risk assessment \
                     and rating: {state['risk_assessment_and_rating']}. Here is the proposal feedback: {state['proposal_feedback']}"

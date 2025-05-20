@@ -1,12 +1,13 @@
 import getpass
 import os
 
-from _constants import LLM_CONFIGS
 from langchain_core.prompts import ChatPromptTemplate
 
 # choose your favorite model # https://langchain-ai.github.io/langgraph/tutorials/workflows/#set-up
 # maybe we want to set nvidia endpoints here too if we wanna use the NIMs
 from langchain_ollama import ChatOllama
+
+from LLMFineTuning.src._constants import LLM_CONFIGS
 
 # def _set_env(var: str):
 #     if not os.environ.get(var):
