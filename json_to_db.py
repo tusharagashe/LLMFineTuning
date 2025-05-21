@@ -32,7 +32,7 @@ def json_to_db(json_path: Path, db_path: Path) -> None:
     if db_path.exists():
         db_path.unlink()            # start fresh
 
-    with json_path.open(encoding="utf‑8") as fp:
+    with json_path.open(encoding="utf-8") as fp:
         data: List[Dict[str, Any]] = json.load(fp)
 
     rows = [flatten(r) for r in data]
