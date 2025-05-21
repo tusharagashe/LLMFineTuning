@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 new_json_to_db.py
 --------------------
@@ -6,7 +7,7 @@ a single SQLite table called `elements`.
 
 Usage
 -----
-$ python simple_json_to_db.py source.json  -o output.db
+$ python new_json_to_db.py source.json  -o output.db
 """
 
 from __future__ import annotations
@@ -41,18 +42,24 @@ def json_to_db(json_path: Path, db_path: Path) -> None:
     with sqlite3.connect(db_path) as conn:
         df.to_sql("elements", conn, index=False)
 
-    print(f"✅  Wrote {len(df)} rows and {len(df.columns)} columns → {db_path.resolve()}")
+    print(f"  Wrote {len(df)} rows and {len(df.columns)} columns → {db_path.resolve()}")
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Flatten JSON → SQLite")
     p.add_argument("json_path", type=Path, help="Source .json file")
     p.add_argument(
-        "-o", "--output", type=Path, default=Path("output.db"),
-        help="Destination .db file (default: ./output.db)",
+        "-o", "--output", type=str, default="output.db",
+        help="Destination .db file name (saved in ./postchunks/)",
     )
     args = p.parse_args()
-    json_to_db(args.json_path, args.output)
+
+    # Create output directory if it doesn't exist
+    output_dir = Path("postchunks")
+    output_dir.mkdir(exist_ok=True)
+
+    db_path = output_dir / args.output
+    json_to_db(args.json_path, db_path)
 
 
 if __name__ == "__main__":

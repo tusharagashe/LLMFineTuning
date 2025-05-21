@@ -1,3 +1,43 @@
+#!/usr/bin/env python3
+"""
+chunk_json_file.py
+--------------------------
+
+Extract and segment semantic text chunks from a ClinicalTrials.gov-style JSON file.
+
+This script reads structured clinical trial records organized into nested sections and 
+subsections (e.g., protocol, results, annotations), flattens the content into text entries, 
+and splits large entries into smaller chunks using LangChain’s RecursiveCharacterTextSplitter.
+
+Typical use case:
+Run this **before** `combine_chunks.py` to produce manageable, semantically relevant text 
+segments for embedding into a vector database or other NLP processing pipelines.
+
+Usage (CLI):
+------------
+$ python chunk_json_file.py trial_file.json
+$ python chunk_json_file.py trial_file.json --chunk_size 800 --chunk_overlap 100 --output trial_file.chunks.json
+
+Arguments:
+----------
+json_file      (str)  : Path to the ClinicalTrials.gov-style JSON file.
+--chunk_size   (int)  : Maximum character length of each chunk (default: 1000).
+--chunk_overlap(int)  : Number of overlapping characters between adjacent chunks (default: 100).
+--output       (str)  : Optional path to save the chunked JSON file (default: <input>.chunks.json)
+
+Output:
+-------
+A JSON file where each item has:
+- "text": content extracted from the trial sections
+- "metadata": {"field": <flattened path of origin in JSON>}
+
+Notes:
+------
+- Uses a section map to traverse key parts of the clinical trial structure.
+- Text fields shorter than the chunk size are left intact.
+- Larger text blocks are recursively split while preserving metadata.
+"""
+
 import json
 import argparse
 from pathlib import Path
@@ -101,4 +141,4 @@ if __name__ == "__main__":
     print(f"Starting processing of {input_path}")
     chunks = chunk_json_file(input_path, args.chunk_size, args.chunk_overlap)
     save_chunks_to_json(chunks, output_path)
-    print(f"✅ Saved {len(chunks)} chunks to {output_path}")
+    print(f" Saved {len(chunks)} chunks to {output_path}")
