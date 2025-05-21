@@ -5,35 +5,22 @@ from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod
 from langchain_ollama import ChatOllama
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
-from langsmith import traceable
-from pydantic import BaseModel, Field
-from typing_extensions import Literal, TypedDict
 
-from ._constants import (
-    LLM_CONFIGS,
-    PROPOSAL_WRITER_SYSTEM_MESSAGE,
-    RISK_ASSESSMENT_SYSTEM_MESSAGE,
-    RISK_CRITQUE_SYSTEM_MESSAGE,
-)
+from ._constants import LLM_CONFIGS, MAX_ITERATIONS
 from .prompts import get_sys_messages
 from .state import Feedback, State
 
 
 class Workflow:
     def __init__(self, name: str = None, strategy: str = "default"):
-        self.iteration_count = 0
+        # self.iteration_count = 0
         self.llm = ChatOllama(model=LLM_CONFIGS["llama3.2"]["model"])
         self.evaluator = self.llm.with_structured_output(Feedback)
-        self.max_iterations = 2
+        self.max_iterations = MAX_ITERATIONS
         self.name = name
         self.system_prompts = get_sys_messages(strategy)
 
-    def evidence_retriever(self, state: State, config: RunnableConfig):
-        # """Retrieve evidence from vector database of related successful and failed trials.
-        # Args:
-        #      state: Current graph state containing the running summary and research topic
-        #      config: Configuration for the runnable, including LLM provider settings
-        # """
+    def evidence_retriever(self, state: State, config: RunnableConfig) -> dict:
         """
         Agent 1: Retrieve precedent evidence related to the proposal.
 
@@ -59,11 +46,9 @@ class Workflow:
             "Lebrikizumab failed Phase 3 for asthma (NCT02918071) due to weak correlation of AER with symptom control.",
             "Dupilumab succeeded in similar eosinophilic population with endpoint of FEV1 + biomarker stratification (BLA761469).",
         ]
-        # state.retrieved_evidence = evidence
-        # state.history.append("Retrieved evidence from vector DB")
         return {"retrieved_evidence": evidence}
 
-    def risk_assessment(self, state: State, config: RunnableConfig):
+    def risk_assessment(self, state: State, config: RunnableConfig) -> dict:
         """
         Agent 2: Assess FDA-relevant risks and rate the proposal.
 
@@ -86,68 +71,30 @@ class Workflow:
             - `pass_or_fail`: "pass" or "fail" decision
             - `rating_score`: Integer score (1–10) used for routing logic
         """
-        # """First LLM call to provide a risk assessment of the user proposal
-        # Args:
-        #      state: Current graph state containing the running summary and research topic
-        #      config: Configuration for the runnable, including LLM provider settings
-        # """
-        # risk_assessment_system_message = SYSTEM_MESSAGES["risk_assessment"]
         risk_assessment_system_message = self.system_prompts["risk_assessment"]
 
-        # if state.get("improved_proposal") or self.iteration_count > 0:
-        if self.iteration_count > 0:
-            # print("improved proposal is being used")
-            # print(state["improved_proposal"])
+        if state.get("iteration_count", 0) > 0:
             input_content = f"""Review this revised proposal: {state["improved_proposal"]}
                             Previous feedback: {state["proposal_feedback"]}
-                            Return a 1–10 rating and domain-level risk YAML."""
+                            Return a 1–10 rating"""
         else:
             input_content = f"""Review this proposal: {state["user_proposal"]}
-                            Return a 1–10 rating and domain-level risk YAML."""
+                            Return a 1–10 rating"""
         response = self.evaluator.invoke(
             [
                 SystemMessage(content=risk_assessment_system_message),
                 HumanMessage(content=input_content),
-                # HumanMessage(
-                #     content=f"Review this proposal, provide a rating, and grade the proposal: {state['improved_proposal']} but take into account the feedback: {state['proposal_feedback']}"
-                # ),
             ],
             config,
         )
-        # else:
-        #     grade = self.evaluator.invoke(
-        #         [
-        #             SystemMessage(content=risk_assessment_system_message),
-        #             HumanMessage(
-        #                 content=f"Review this proposal, provide a rating, and grade the proposal: {state['user_proposal']}"
-        #             ),
-        #         ],
-        #         config,
-        #     )
-        # return {
-        #     "pass_or_fail": grade.grade,
-        #     "risk_assessment_and_rating": grade.feedback,
-        # }
+
         return {
             "risk_assessment_and_rating": response.feedback,
             "pass_or_fail": response.grade,
             "rating_score": response.rating,
         }
 
-    # def check_rating(self, state: State):
-    #     """Gate function to check if the risk rating is = -1 out of 10"""
-
-    #     if "-1" in state["risk_assessment_and_rating"]:
-    #         return "Fail"
-    #     return "Fail"
-
-    def regulatory_risk_critquer(self, state: State, config: RunnableConfig):
-        # """Second LLM call to provide specific feedback based on different categories
-        # of regulatory approval to improve the rating.
-        # Args:
-        #     state: Current graph state containing the running summary and research topic
-        #     config: Configuration for the runnable, including LLM provider settings
-        # """
+    def regulatory_risk_critquer(self, state: State, config: RunnableConfig) -> dict:
         """
         Agent 3: Provide domain-specific critique and mitigation strategies.
 
@@ -170,12 +117,10 @@ class Workflow:
             - `proposal_feedback`: Bullet-pointed feedback with mitigation suggestions
         """
 
-        # risk_critique_system_message = SYSTEM_MESSAGES["risk_critiquer"]
-
         risk_critique_system_message = self.system_prompts["risk_critiquer"]
         proposal = (
             state["improved_proposal"]
-            if self.iteration_count > 0
+            if state.get("iteration_count", 0) > 0
             else state["user_proposal"]
         )
 
@@ -190,33 +135,9 @@ class Workflow:
             config,
         )
 
-        # if self.iteration_count == 0:
-        #     msg = self.llm.invoke(
-        #         [
-        #             SystemMessage(content=risk_critique_system_message),
-        #             HumanMessage(
-        #                 content=f"Here is the original proposal: {state['user_proposal']}. Here is the risk assessment \
-        #                 and rating: {state['risk_assessment_and_rating']}"
-        #             ),
-        #         ],
-        #         config,
-        #     )
-        # else:
-        #     msg = self.llm.invoke(
-        #         [
-        #             SystemMessage(content=risk_critique_system_message),
-        #             HumanMessage(
-        #                 content=f"Here is the proposal: {state['improved_proposal']}. Here is the risk assessment \
-        #                 and rating: {state['risk_assessment_and_rating']}"
-        #             ),
-        #         ],
-        #         config,
-        #     )
-        # if self.iteration_count > 0:
-        #     return state["proposal_feedback"].append(msg.content)
         return {"proposal_feedback": response.content}
 
-    def proposal_writer(self, state: State, config: RunnableConfig):
+    def proposal_writer(self, state: State, config: RunnableConfig) -> dict:
         """
         Agent 4: Rewrite the proposal based on prior risk assessment and feedback.
 
@@ -238,15 +159,11 @@ class Workflow:
             Dictionary containing:
             - `improved_proposal`: A refined proposal ready for re-evaluation
         """
-        # """Third LLM call for writing a new proposal based on feedback.
-        # Args:
-        #     state: Current graph state containing the running summary and research topic
-        #     config: Configuration for the runnable, including LLM provider settings"""
-        # proposal_writer_sys_message = SYSTEM_MESSAGES["proposal_writer"]
+
         proposal_writer_sys_message = self.system_prompts["proposal_writer"]
         proposal = (
             state["improved_proposal"]
-            if self.iteration_count > 0
+            if state.get("iteration_count", 0) > 0
             else state["user_proposal"]
         )
 
@@ -254,46 +171,20 @@ class Workflow:
             [
                 SystemMessage(content=proposal_writer_sys_message),
                 HumanMessage(
-                    content=f"""Rewrite the following proposal using these insights:
-            Original Proposal:\n{proposal}
-
-            Risk Assessment:\n{state["risk_assessment_and_rating"]}
-            Critique:\n{state["proposal_feedback"]}
-        """
+                    content=f"""
+                    Rewrite the following proposal using these insights:
+                    Original Proposal:\n{proposal}
+                    Risk Assessment:\n{state["risk_assessment_and_rating"]}
+                    Critique:\n{state["proposal_feedback"]}
+                    """
                 ),
             ],
             config,
         )
 
-        # if self.iteration_count == 0:
-        #     msg = self.llm.invoke(
-        #         [
-        #             SystemMessage(content=proposal_writer_sys_message),
-        #             HumanMessage(
-        #                 content=f"Here is the original proposal: {state['user_proposal']}. Here is the risk assessment \
-        #                 and rating: {state['risk_assessment_and_rating']}. Here is the proposal feedback: {state['proposal_feedback']}"
-        #             ),
-        #         ],
-        #         config,
-        #     )
-        # else:
-        #     msg = self.llm.invoke(
-        #         [
-        #             SystemMessage(content=proposal_writer_sys_message),
-        #             HumanMessage(
-        #                 content=f"Here is the current proposal: {state['improved_proposal']}. Here is the risk assessment \
-        #                 and rating: {state['risk_assessment_and_rating']}. Here is the proposal feedback: {state['proposal_feedback']}"
-        #             ),
-        #         ],
-        #         config,
-        #     )
         return {"improved_proposal": response.content}
 
-    def route_proposal(self, state: State):
-        # """Route back to risk assessment agent or end based upon feedback from the evaluator.
-        # Args:
-        #     state: Current graph state containing the running summary and research topic
-        # """
+    def route_proposal(self, state: State) -> str:
         """
         Decision function to determine the next step in the workflow.
 
@@ -313,49 +204,34 @@ class Workflow:
             - "Accepted": Proposal passes and workflow ends
             - "Rejected + Feedback": Loop continues to another risk critique cycle
         """
-        # if (
-        #     state.get("rating_score", 0) >= 7
-        #     or self.iteration_count >= self.max_iterations
-        # ):
-        if self.iteration_count >= self.max_iterations:
+        current_iter = state.get("iteration_count", 0)
+        if current_iter >= self.max_iterations:
             return "Accepted"
         else:
-            self.iteration_count += 1
             return "Rejected + Feedback"
 
-        # if self.iteration_count < self.max_iterations:
-        #     self.iteration_count += 1
-        #     return "Rejected + Feedback"
-        # else:
-        #     return "Accepted"
-
-        # if state["pass_or_fail"] == "pass":
-        #     return "Accepted"
-        # elif state["pass_or_fail"] == "fail":
-        #     state.iteration_loop += 1
-        #     return "Rejected + Feedback"
+    def increment_iteration(self, state: State, config: RunnableConfig) -> dict:
+        print(state.get("iteration_count", 0))
+        print(state.get("rating_score", -1))
+        return {"iteration_count": state.get("iteration_count", 0) + 1}
 
     def build_graph(self, memory: MemorySaver) -> StateGraph:
         builder = StateGraph(State)
 
-        # Add nodes
         builder.add_node("retrieve_evidence", self.evidence_retriever)
         builder.add_node("risk_assessment", self.risk_assessment)
         builder.add_node("regulatory_risk_critquer", self.regulatory_risk_critquer)
         builder.add_node("proposal_writer", self.proposal_writer)
+        builder.add_node("iteration_incrementer", self.increment_iteration)
 
-        # Add edges to connect nodes
         builder.add_edge(START, "retrieve_evidence")
         builder.add_edge("retrieve_evidence", "risk_assessment")
-        # workflow.add_conditional_edges(
-        #     "risk_assessment",
-        #     self.check_rating,
-        #     {"Fail": "regulatory_risk_critquer", "Pass": END},
-        # )
         builder.add_edge("risk_assessment", "regulatory_risk_critquer")
         builder.add_edge("regulatory_risk_critquer", "proposal_writer")
+        builder.add_edge("proposal_writer", "iteration_incrementer")
+
         builder.add_conditional_edges(
-            "proposal_writer",
+            "iteration_incrementer",
             self.route_proposal,
             {
                 "Accepted": END,
@@ -384,32 +260,29 @@ class Workflow:
     #     else:
     #         print("Proposal failed quality gate - lower than 5 threshold!")
 
-    def print_chat(self, state: State):
-        print(f"ITERATION {self.iteration_count}")
-        print("\n📥 Original Proposal:")
+    def print_chat(self, state: State) -> None:
+        print(f"ITERATION {state.get('iteration_count', 0)}")
+
+        print("\n Original Proposal:")
         print(state["user_proposal"])
 
         if state.get("retrieved_evidence"):
-            print("\n📚 Retrieved Evidence:")
+            print("\n Retrieved Evidence:")
             for e in state["retrieved_evidence"]:
                 print(f"- {e}")
 
         if state.get("risk_assessment_and_rating"):
-            print("\n🔍 Risk Assessment Summary:")
+            print("\n Risk Assessment Summary:")
             print(state["risk_assessment_and_rating"])
 
-        if state.get("risk_assessment_yaml"):
-            print("\n🧾 Risk Assessment (YAML):")
-            print(state["risk_assessment_yaml"])
-
         if state.get("proposal_feedback"):
-            print("\n🛠️ Critique Feedback:")
+            print("\n Critique Feedback:")
             print(state["proposal_feedback"])
 
         if state.get("improved_proposal"):
-            print("\n✏️ Rewritten Proposal:")
+            print("\n Rewritten Proposal:")
             print(state["improved_proposal"])
 
         print(
-            f"\n✅ Grade: {state.get('pass_or_fail')}  |  Score: {state.get('rating_score')}"
+            f"\n Grade: {state.get('pass_or_fail')}  |  Score: {state.get('rating_score')}"
         )

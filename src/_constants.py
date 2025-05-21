@@ -17,6 +17,7 @@ LLM_CONFIGS = {
     "llama3.2": {"model": "llama3.2", "api_key": os.getenv("LLAMA_API_KEY")},
     "nvidia": {"model": "gpt-4o-mini", "api_key": os.getenv("NVIDIA_API_KEY")},
 }
+MAX_ITERATIONS = 2
 
 SYSTEM_MESSAGES_DEFAULT = {
     "risk_assessment": "You are a FDA regulatory reviewer. Provide a risk \

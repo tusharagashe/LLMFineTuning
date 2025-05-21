@@ -1,6 +1,7 @@
 import getpass
 import os
 
+from IPython.display import Image, display
 from langchain_core.prompts import ChatPromptTemplate
 
 # choose your favorite model # https://langchain-ai.github.io/langgraph/tutorials/workflows/#set-up
