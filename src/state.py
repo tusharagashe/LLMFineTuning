@@ -29,7 +29,7 @@ class State(TypedDict):
     )
 
     # de-risker agent
-    mechanistic_mitigation: Optional[str] = None
+    mechanistic_suggestion: Optional[str] = None
     mechanistic_rationale: Optional[str] = None
     mechanistic_alternative: Optional[str] = None
     biomarker_mitigation: Optional[str] = None
@@ -50,7 +50,7 @@ class State(TypedDict):
     safety_mitigation_history: List[str] = []
 
     # format orchestrator agent
-    final_review_document: Optional[str] = Field(
+    final_review_paragraph: Optional[str] = Field(
         None,
         description="A free-form text final review document of all changes needed to be made.",
     )
@@ -69,7 +69,7 @@ class RiskAssessmentFeedback(BaseModel):
 
 
 class DeRiskerFeedback(BaseModel):
-    mechanistic_mitigation: str
+    mechanistic_suggestion: str
     mechanistic_rationale: str
     mechanistic_alternative: str
     biomarker_mitigation: str
@@ -85,7 +85,7 @@ class DeRiskerFeedback(BaseModel):
 
 
 class FormatOutput(BaseModel):
-    final_review_document: str
+    final_review_paragraph: str
 
 
 # class Feedback(BaseModel):

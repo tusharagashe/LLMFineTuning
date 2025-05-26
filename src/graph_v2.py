@@ -14,6 +14,7 @@ from .prompts import (
     get_sys_messages,
     risk_assessor_prompt,
 )
+from .reranker_integration import RerankerIntegration
 from .state import DeRiskerFeedback, FormatOutput, RiskAssessmentFeedback, State
 
 
@@ -163,13 +164,13 @@ class Workflow:
         )
         # return response
         return {  # TODO: EDIT THIS!!!!
-            "mechanistic_mitigation": response.mechanistic_mitigation,
+            "mechanistic_suggestion": response.mechanistic_suggestion,
             "mechanistic_rationale": response.mechanistic_rationale,
             "mechanistic_alternative": response.mechanistic_alternative,
             "mechanistic_mitigation_history": state.get(
                 "mechanistic_mitigation_history", []
             )
-            + [response.mechanistic_mitigation],
+            + [response.mechanistic_suggestion],
             "biomarker_mitigation": response.biomarker_mitigation,
             "biomarker_rationale": response.biomarker_rationale,
             "biomarker_alternative": response.biomarker_alternative,
@@ -226,7 +227,7 @@ class Workflow:
         -------
         dict
             Dictionary containing:
-            - `final_review_document`: A refined review document
+            - `final_review_paragraph`: A refined review document
         """
 
         format_orchestrator_system_message = self.system_messages["format_orchestrator"]
@@ -242,7 +243,7 @@ class Workflow:
             user_proposal=state["user_proposal"],
             risk_assessment=state["risk_assessment"],
             # overall_summary=state["overall_summary_of_suggestions"],
-            mechanistic_suggestion=state["mechanistic_mitigation"],
+            mechanistic_suggestion=state["mechanistic_suggestion"],
             mechanistic_rationale=state["mechanistic_rationale"],
             mechanistic_alternative=state["mechanistic_alternative"],
             biomarker_suggestion=state["biomarker_mitigation"],
