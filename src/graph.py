@@ -40,7 +40,6 @@ class Workflow:
         dict
             Dictionary containing a list of relevant evidence examples as `retrieved_evidence`.
         """
-
         # TODO: Vector DB call based on state.proposal
         evidence = [
             "Lebrikizumab failed Phase 3 for asthma (NCT02918071) due to weak correlation of AER with symptom control.",
