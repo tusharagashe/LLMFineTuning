@@ -188,10 +188,3 @@ def fetch_trials_in_literature(query: str) -> State:
         abstracts = [f"Error fetching literature: {str(e)}"]
     return {"drug": query, "literature_failures": abstracts}
   
-
-
-
-
-
-
-
