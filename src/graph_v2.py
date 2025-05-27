@@ -58,10 +58,18 @@ class Workflow:
             Dictionary containing a list of relevant evidence examples as `retrieved_evidence`.
         """
         # TODO: Vector DB call based on state.proposal
-        evidence = [
-            "Lebrikizumab failed Phase 3 for asthma (NCT02918071) due to weak correlation of AER with symptom control.",
-            "Dupilumab succeeded in similar eosinophilic population with endpoint of FEV1 + biomarker stratification (BLA761469).",
-        ]
+        # evidence = [
+        #     "Lebrikizumab failed Phase 3 for asthma (NCT02918071) due to weak correlation of AER with symptom control.",
+        #     "Dupilumab succeeded in similar eosinophilic population with endpoint of FEV1 + biomarker stratification (BLA761469).",
+        # ]
+        integration = RerankerIntegration(
+            milvus_db="milvusdb/combined_fda_chunks_milvus.db",
+            collection_name="fda_chunks",
+        )
+        evidence = integration.query_and_rerank(
+            state["user_proposal"], top_k=10, top_n=5
+        )
+
         return {"retrieved_evidence": evidence}
 
     def risk_assessor(self, state: State, config: RunnableConfig) -> dict:
@@ -154,6 +162,7 @@ class Workflow:
         input_prompt = derisker_prompt.format(
             user_proposal=state["user_proposal"],
             risk_assessment=state["risk_assessment"],
+            retrieved_evidence=state["retrieved_evidence"],
         )
         response = self.de_risker_llm.invoke(
             [
@@ -167,27 +176,27 @@ class Workflow:
             "mechanistic_suggestion": response.mechanistic_suggestion,
             "mechanistic_rationale": response.mechanistic_rationale,
             "mechanistic_alternative": response.mechanistic_alternative,
-            "mechanistic_mitigation_history": state.get(
-                "mechanistic_mitigation_history", []
+            "mechanistic_suggestion_history": state.get(
+                "mechanistic_suggestion_history", []
             )
             + [response.mechanistic_suggestion],
-            "biomarker_mitigation": response.biomarker_mitigation,
+            "biomarker_suggestion": response.biomarker_suggestion,
             "biomarker_rationale": response.biomarker_rationale,
             "biomarker_alternative": response.biomarker_alternative,
-            "biomarker_mitigation_history": state.get(
-                "biomarker_mitigation_history", []
+            "biomarker_suggestion_history": state.get(
+                "biomarker_suggestion_history", []
             )
-            + [response.biomarker_mitigation],
-            "endpoint_mitigation": response.endpoint_mitigation,
+            + [response.biomarker_suggestion],
+            "endpoint_suggestion": response.endpoint_suggestion,
             "endpoint_rationale": response.endpoint_rationale,
             "endpoint_alternative": response.endpoint_alternative,
-            "endpoint_mitigation_history": state.get("endpoint_mitigation_history", [])
-            + [response.endpoint_mitigation],
-            "safety_mitigation": response.safety_mitigation,
+            "endpoint_suggestion_history": state.get("endpoint_suggestion_history", [])
+            + [response.endpoint_suggestion],
+            "safety_suggestion": response.safety_suggestion,
             "safety_rationale": response.safety_rationale,
             "safety_alternative": response.safety_alternative,
-            "safety_mitigation_history": state.get("safety_mitigation_history", [])
-            + [response.safety_mitigation],
+            "safety_suggestion_history": state.get("safety_suggestion_history", [])
+            + [response.safety_suggestion],
             # You can also track rationale/alternatives in the same way if needed
         }
 
@@ -246,13 +255,13 @@ class Workflow:
             mechanistic_suggestion=state["mechanistic_suggestion"],
             mechanistic_rationale=state["mechanistic_rationale"],
             mechanistic_alternative=state["mechanistic_alternative"],
-            biomarker_suggestion=state["biomarker_mitigation"],
+            biomarker_suggestion=state["biomarker_suggestion"],
             biomarker_rationale=state["biomarker_rationale"],
             biomarker_alternative=state["biomarker_alternative"],
-            endpoint_suggestion=state["endpoint_mitigation"],
+            endpoint_suggestion=state["endpoint_suggestion"],
             endpoint_rationale=state["endpoint_rationale"],
             endpoint_alternative=state["endpoint_alternative"],
-            safety_suggestion=state["safety_mitigation"],
+            safety_suggestion=state["safety_suggestion"],
             safety_rationale=state["safety_rationale"],
             safety_alternative=state["safety_alternative"],
         )
@@ -317,11 +326,11 @@ class Workflow:
         return {"iteration_count": state.get("iteration_count", 0) + 1}
 
     def human_feedback_collector(state: State, config: RunnableConfig) -> dict:
-        print("\n📝 Final Formatted Review:\n")
+        print("Final Formatted Review:\n")
         print(state["formatted_review"])
 
-        print("\n🧠 Enter your comment or decision:")
-        feedback = input("💬 Human says: ")
+        print("Enter your comment or decision:")
+        feedback = input("Human says: ")
 
         return {"human_feedback": feedback}
 

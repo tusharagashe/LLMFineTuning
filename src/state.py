@@ -32,22 +32,22 @@ class State(TypedDict):
     mechanistic_suggestion: Optional[str] = None
     mechanistic_rationale: Optional[str] = None
     mechanistic_alternative: Optional[str] = None
-    biomarker_mitigation: Optional[str] = None
+    biomarker_suggestion: Optional[str] = None
     biomarker_rationale: Optional[str] = None
     biomarker_alternative: Optional[str] = None
-    endpoint_mitigation: Optional[str] = None
+    endpoint_suggestion: Optional[str] = None
     endpoint_rationale: Optional[str] = None
     endpoint_alternative: Optional[str] = None
-    safety_mitigation: Optional[str] = None
+    safety_suggestion: Optional[str] = None
     safety_rationale: Optional[str] = None
     safety_alternative: Optional[str] = None
     # overall_summary_of_suggestions: Optional[str] = None
 
     # History tracking (across iterations)
-    mechanistic_mitigation_history: List[str] = []
-    biomarker_mitigation_history: List[str] = []
-    endpoint_mitigation_history: List[str] = []
-    safety_mitigation_history: List[str] = []
+    mechanistic_suggestion_history: List[str] = []
+    biomarker_suggestion_history: List[str] = []
+    endpoint_suggestion_history: List[str] = []
+    safety_suggestion_history: List[str] = []
 
     # format orchestrator agent
     final_review_paragraph: Optional[str] = Field(
@@ -72,13 +72,13 @@ class DeRiskerFeedback(BaseModel):
     mechanistic_suggestion: str
     mechanistic_rationale: str
     mechanistic_alternative: str
-    biomarker_mitigation: str
+    biomarker_suggestion: str
     biomarker_rationale: str
     biomarker_alternative: str
-    endpoint_mitigation: str
+    endpoint_suggestion: str
     endpoint_rationale: str
     endpoint_alternative: str
-    safety_mitigation: str
+    safety_suggestion: str
     safety_rationale: str
     safety_alternative: str
     # overall_summary_of_suggestions: str

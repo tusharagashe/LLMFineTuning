@@ -67,12 +67,16 @@ def get_risk_assessor_sysmsg(iteration_count):
 derisker_prompt = PromptTemplate.from_template(
     """
     You are a regulatory strategist tasked with mitigating risks in a clinical trial.
+    Use retrieved evidence of successful trials to provide your feedback.
 
     Original Proposal:
     {user_proposal}
 
     Risk Assessment Summary:
     {risk_assessment}
+    
+    Evidence Retrieved:
+    {retrieved_evidence}
 
     For each of the following domains—Mechanism, Biomarker, Endpoint, Safety—
     suggest:
