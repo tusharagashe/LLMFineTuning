@@ -26,6 +26,30 @@ evidence_retriever_prompt = PromptTemplate.from_template(
     """
 )
 
+llm_api_tool_prompt = PromptTemplate.from_template("""You are a biomedical research assistant with access to multiple APIs:
+
+1. fetch_clinical_trials: Get clinical trial data (successes and failures) for drugs/conditions
+2. fetch_fda_adverse_events: Get adverse event reports for drugs  
+3. fetch_trials_in_literature: Search literature for clinical trial failures
+4. fetch_opentargets_associations: Get gene-disease associations
+
+For comprehensive analysis, you may need to call multiple tools. Examples:
+- Drug safety questions: call adverse events + clinical trials
+- Gene analysis: call gene associations + related clinical trials  
+- Failure analysis: call literature failures + clinical trials
+- Complete drug profile: call all relevant tools
+
+Always extract the key search terms (drug names, gene symbols, conditions) accurately.
+
+User proposal: {user_proposal}
+
+Retrieved Evidence from Vector DB: {retrieved_evidence}
+
+Should I call any of these tools to gather additional evidence? 
+
+"""
+)
+
 # ------------------------
 # Agent 2: Risk Assessor
 # ------------------------

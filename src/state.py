@@ -14,7 +14,9 @@ class State(TypedDict):
 
     # evidence retriever function
     retrieved_evidence: Optional[List[str]] = None
-
+    drug: str
+    api_messages: Optional[List[str]] = None
+    
     # risk assessor agent
     mechanistic_risk_ranking: Optional[Literal["high", "medium", "low"]] = None
     biomarker_risk_ranking: Optional[Literal["high", "medium", "low"]] = None

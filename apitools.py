@@ -32,7 +32,7 @@ def fetch_clinical_trials(drug: str) -> dict:
             params = {
                 "query.term": drug,
                 "filter.overallStatus": status,
-                "fields": "NCTId,BriefTitle,OverallStatus,WhyStopped,CompletionDate,StartDate",
+                "fields": "NCTId,BriefTitle,BriefSummary,OverallStatus,WhyStopped,CompletionDate,StartDate",
                 "pageSize": 3,
                 "format": "json"
             }
@@ -47,14 +47,17 @@ def fetch_clinical_trials(drug: str) -> dict:
                 protocol = study.get("protocolSection", {})
                 identification = protocol.get("identificationModule", {})
                 status_module = protocol.get("statusModule", {})
+                description_module = protocol.get("descriptionModule", {})
+                
                 
                 title = identification.get("briefTitle", "")
                 overall_status = status_module.get("overallStatus", "N/A")
                 why_stopped = status_module.get("whyStopped", "")
                 completion_date = status_module.get("primaryCompletionDate", {}).get("date", "")
                 start_date = status_module.get("studyFirstSubmitDate", "")
-                
-                trial_text = f"[{status}] {title} (Status: {overall_status})"
+                description = description_module.get("briefSummary", "")
+                                                     
+                trial_text = f"[{status}] {title} | Description: {description} (Status: {overall_status})"
                 if completion_date:
                     trial_text += f" | Completed: {completion_date}"
                 if why_stopped:
