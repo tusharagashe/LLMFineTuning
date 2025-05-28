@@ -16,7 +16,7 @@ class State(TypedDict):
     retrieved_evidence: Optional[List[str]] = None
     drug: str
     api_messages: Optional[List[str]] = None
-    
+
     # risk assessor agent
     mechanistic_risk_ranking: Optional[Literal["high", "medium", "low"]] = None
     biomarker_risk_ranking: Optional[Literal["high", "medium", "low"]] = None
@@ -62,7 +62,7 @@ class State(TypedDict):
 # Feedback Models for Structured Output
 # ------------------------
 class RiskAssessmentFeedback(BaseModel):
-    risk_assessment: str = Field(...)
+    risk_assessment: str
     mechanistic_risk_ranking: Literal["high", "medium", "low"]
     biomarker_risk_ranking: Literal["high", "medium", "low"]
     endpoint_risk_ranking: Literal["high", "medium", "low"]

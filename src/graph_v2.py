@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from IPython.display import Image, display
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
@@ -8,24 +11,27 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
-
 from ._constants import LLM_CONFIGS, MAX_ITERATIONS
+from .apitools import (
+    fetch_clinical_trials,
+    fetch_fda_adverse_events,
+    fetch_opentargets_associations,
+    fetch_trials_in_literature,
+)
 from .prompts import (
     derisker_prompt,
     evidence_retriever_prompt,
     format_orchestrator_prompt,
     get_sys_messages,
+    llm_api_tool_prompt,
     risk_assessor_prompt,
-    llm_api_tool_prompt
 )
 from .reranker_integration import RerankerIntegration
 from .state import DeRiskerFeedback, FormatOutput, RiskAssessmentFeedback, State
-from .. apitools import fetch_clinical_trials, fetch_fda_adverse_events, fetch_opentargets_associations, fetch_trials_in_literature
-import os
-from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+
 
 class Workflow:
     def __init__(
@@ -47,7 +53,12 @@ class Workflow:
         self.max_iterations = max_iter
         self.name = name
         self.system_messages = get_sys_messages(strategy, iteration_count=0)
-        self.tools = [fetch_clinical_trials, fetch_fda_adverse_events, fetch_opentargets_associations, fetch_trials_in_literature]
+        self.tools = [
+            fetch_clinical_trials,
+            fetch_fda_adverse_events,
+            fetch_opentargets_associations,
+            fetch_trials_in_literature,
+        ]
 
     def evidence_retriever(self, state: State, config: RunnableConfig) -> dict:
         """
@@ -81,32 +92,36 @@ class Workflow:
         evidence = integration.query_and_rerank(
             state["user_proposal"], top_k=10, top_n=5
         )
-        
+
         llm_with_api_tools = self.llm.bind_tools(self.tools)
-        
-        input_prompt = llm_api_tool_prompt.format(user_proposal=state["user_proposal"], retrieved_evidence=evidence)
-        
-        response = llm_with_api_tools.invoke([HumanMessage(content=input_prompt)], config)
- 
+
+        input_prompt = llm_api_tool_prompt.format(
+            user_proposal=state["user_proposal"], retrieved_evidence=evidence
+        )
+
+        response = llm_with_api_tools.invoke(
+            [HumanMessage(content=input_prompt)], config
+        )
+
         return {"retrieved_evidence": evidence, "api_messages": [response]}
 
     def should_call_tools(self, state: State):
         """Check if evidence_retriever wants to call external APIs"""
-        
+
         if "api_messages" in state and state["api_messages"]:
             last_message = state["api_messages"][-1]
-            if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
+            if hasattr(last_message, "tool_calls") and last_message.tool_calls:
                 return "api_tools"
         return "continue"
 
     def combine_evidence(self, state: State) -> dict:
         """Combine vdb retrieval evidence with API tool results"""
-        
+
         all_evidence = list(state.get("retrieved_evidence", []))
         for msg in state.get("api_messages", []):
             if isinstance(msg, ToolMessage):
                 all_evidence.append(f"External API Data: {msg.content}")
-        
+
         return {"retrieved_evidence": all_evidence}
 
     def risk_assessor(self, state: State, config: RunnableConfig) -> dict:
@@ -377,7 +392,9 @@ class Workflow:
 
         builder.add_node("evidence_retriever", self.evidence_retriever)
         builder.add_node("api_tools", ToolNode(self.tools, messages_key="api_messages"))
-        builder.add_node("combine_evidence", self.combine_evidence)  # aggregates api responses with vector db response  
+        builder.add_node(
+            "combine_evidence", self.combine_evidence
+        )  # aggregates api responses with vector db response
         builder.add_node("risk_assessor", self.risk_assessor)
         builder.add_node("de_risker", self.de_risker)
         builder.add_node("format_orchestrator", self.format_orchestrator)
@@ -386,13 +403,10 @@ class Workflow:
 
         builder.add_edge(START, "evidence_retriever")
         builder.add_conditional_edges(
-                "evidence_retriever",
-                self.should_call_tools,
-                {
-                    "api_tools": "api_tools",
-                    "continue": "risk_assessor"
-                }
-            )
+            "evidence_retriever",
+            self.should_call_tools,
+            {"api_tools": "api_tools", "continue": "risk_assessor"},
+        )
         builder.add_edge("api_tools", "combine_evidence")
         builder.add_edge("combine_evidence", "risk_assessor")
         builder.add_edge("risk_assessor", "de_risker")
