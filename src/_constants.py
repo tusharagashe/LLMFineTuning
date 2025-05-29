@@ -1,5 +1,10 @@
 import os
+import sys
+from pathlib import Path
 
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from extract_and_format_prompt_gpt import generate_user_prompt
 # File Paths
 MODELS_DIR = "models/"
 
@@ -55,12 +60,12 @@ OpenFDA (drug/label, drug/event, FAERS): for safety signals, boxed warnings, and
 
 Alzheimer's example as an example case study: 
 INPUT
-Candidate MoA: [Insert e.g., “immune checkpoint blockade”, “soluble Aβ oligomer targeting”]
-Target(s): [Insert e.g., “PD-1”, “IL-6R”, “APP”, “MAPT”]
-Indication: [Insert disease or condition, e.g., “non-small cell lung cancer”, “Alzheimer’s disease”]
-Proposed Biomarkers: [Insert e.g., “PD-L1 IHC”, “CSF tau”, “circulating IL-6”]
-Primary Endpoint: [Insert e.g., “PFS at 24 weeks”, “MMSE change at 52 weeks”]
-Reference Product (if similar mAb exists): [Insert e.g., “Lecanemab”, “Nivolumab”]
+Candidate MoA: [Insert e.g., "immune checkpoint blockade", "soluble Aβ oligomer targeting"]
+Target(s): [Insert e.g., "PD-1", "IL-6R", "APP", "MAPT"]
+Indication: [Insert disease or condition, e.g., "non-small cell lung cancer", "Alzheimer's disease"]
+Proposed Biomarkers: [Insert e.g., "PD-L1 IHC", "CSF tau", "circulating IL-6"]
+Primary Endpoint: [Insert e.g., "PFS at 24 weeks", "MMSE change at 52 weeks"]
+Reference Product (if similar mAb exists): [Insert e.g., "Lecanemab", "Nivolumab"]
 
 TASK
 For each of the four domains below, perform the following:
@@ -101,7 +106,7 @@ RISK_CRITQUE_SYSTEM_MESSAGE = """
 ROLE
 You are the Risk Assessor Agent in a multi‑agent pipeline that evaluates clinical‑trial
 protocols for monoclonal‑antibody (mAb) therapeutics. Your tone should simulate a skeptical FDA advisory committee reviewer. 
-Always ask: “What could go wrong?”, “What’s missing?”, and “Would this design convince the FDA given recent failures in similar programs?”
+Always ask: "What could go wrong?", "What's missing?", and "Would this design convince the FDA given recent failures in similar programs?"
 
 
 MANDATE
@@ -187,7 +192,7 @@ RiskMitigationPlan:
     Rationale: "<≤25 words with key citation>"
     AlternativeApproach: "<≤25 words or 'N/A'>"
     RepurposingOptions:                # include **only** when NumericScore ≥4
-      - Indication: "Parkinson’s disease"
+      - Indication: "Parkinson's disease"
         Evidence: "OpenTargets score 0.72 (opentargets_tool:APP)"
   BiomarkerRisk:
     …
@@ -345,7 +350,7 @@ EVIDENCE_RETREIVER_SYS_MESSAGE_NEW_WF = """
 You are an expert biomedical evidence retrieval agent. 
 Given a trial proposal, retrieve and summarize precedent examples (both failed and successful) 
 from the FDA, clinical trials, and drug databases. 
-Focus on matching the proposal’s mechanism of action, biomarker strategy, 
+Focus on matching the proposal's mechanism of action, biomarker strategy, 
 endpoints, and patient inclusion criteria. Output concise, relevant examples 
 that provide strong analogs or cautionary precedents.
 """
@@ -380,7 +385,7 @@ Provide the rationale based on regulatory precedent or scientific literature
 
 Offer an alternative path if the mitigation is not feasible
 
-Your goal is to improve the proposal’s regulatory robustness and align 
+Your goal is to improve the proposal's regulatory robustness and align 
 it with successful trial strategies."""
 
 FORMAT_ORCHESTRATOR_SYS_MESSAGE_NEW_WF = """
@@ -407,25 +412,4 @@ SYSTEM_MESSAGES_NEW_WF = {
 }
 
 
-NEW_USER_PROMPT = {
-    "user_proposal": (
-        "This is a Phase 3 randomized, double-blind, placebo-controlled trial evaluating the analgesic efficacy and safety of "
-        "tanezumab (2.5 mg and 5 mg) administered subcutaneously every 8 weeks in patients with osteoarthritis of the hip or knee. "
-        "The study includes co-primary endpoints based on the WOMAC Pain subscale, WOMAC Physical Function subscale, and Patient's "
-        "Global Assessment of Osteoarthritis at 24 weeks. Approximately 810 subjects are randomized in a 1:1:1 ratio to tanezumab 2.5 mg, "
-        "5 mg, or placebo. Subjects will receive three doses over 24 weeks. Safety concerns include rapidly progressive osteoarthritis, "
-        "joint deterioration, and neurological adverse events."
-    ),
-    "mechanism": "Monoclonal antibody targeting Nerve Growth Factor (NGF)",
-    "biomarker": "Serum NGF concentration and osteoarthritis biomarkers (exploratory)",
-    "endpoint": (
-        "Co-primary: Change from Baseline to Week 24 in WOMAC Pain subscale, Physical Function subscale, and Patient’s Global Assessment. "
-        "Secondary: Multiple timepoint WOMAC scores, WPAI:OA, EQ-5D-5L, mPRTI, and rescue medication usage."
-    ),
-    "indication": "Osteoarthritis of the hip or knee",
-    "safety": (
-        "Risk of joint deterioration, rapidly progressive osteoarthritis, total joint replacements, neurological effects, "
-        "autonomic symptoms, and anti-tanezumab antibodies"
-    ),
-    "iteration_count": 0,
-}
+NEW_USER_PROMPT = generate_user_prompt("m16534-protocol-v4-0_redboxed.pdf")
