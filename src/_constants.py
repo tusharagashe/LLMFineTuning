@@ -4,9 +4,9 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from extract_and_format_prompt_gpt import generate_user_prompt
+#from extract_and_format_prompt_gpt import generate_user_prompt
 # File Paths
-MODELS_DIR = "models/"
+#MODELS_DIR = "models/"
 
 # LLM Configuration
 # LLM_CONFIGS = {
@@ -22,7 +22,7 @@ LLM_CONFIGS = {
     "llama3.2": {"model": "llama3.2", "api_key": os.getenv("LLAMA_API_KEY")},
     "nvidia": {"model": "gpt-4o-mini", "api_key": os.getenv("NVIDIA_API_KEY")},
 }
-MAX_ITERATIONS = 2
+MAX_ITERATIONS = 15
 
 SYSTEM_MESSAGES_DEFAULT = {
     "risk_assessment": "You are a FDA regulatory reviewer. Provide a risk \
@@ -412,4 +412,13 @@ SYSTEM_MESSAGES_NEW_WF = {
 }
 
 
-NEW_USER_PROMPT = generate_user_prompt("m16534-protocol-v4-0_redboxed.pdf")
+NEW_USER_PROMPT = {
+  "user_proposal": "This clinical trial was designed to evaluate the efficacy and safety of XmAb20717 in patients with advanced B-cell malignancies. The trial was a phase II, open-label, randomized controlled trial with two treatment arms: XmAb20717 500mg IV every 2 weeks and placebo. A total of 100 patients were enrolled, with a median age of 55 years and ECOG performance status 0-1. The study duration was 24 weeks, with follow-up for an additional 12 weeks. Key inclusion/exclusion criteria included: patients with histologically confirmed B-cell malignancies, measurable or evaluable disease, and prior treatment with chemotherapy or immunotherapy within 6 months. Primary objectives included assessing the overall response rate (ORR) and progression-free survival (PFS). Secondary endpoints included evaluating the safety profile of XmAb20717 and exploring biomarkers for predictive value.",
+  "mechanism": "XmAb20717 is a monoclonal antibody targeting CD19, a key antigen on B cells. Its mechanism of action involves binding to CD19, leading to B cell depletion through mechanisms involving complement-dependent cytotoxicity (CDC) and antibody-dependent cellular cytotoxicity (ADCC). Preclinical studies demonstrated the efficacy of XmAb20717 in inducing complete remission in patients with relapsed or refractory B-cell malignancies. The target pathway involves the CD19-CD21 interaction, which is critical for B cell activation and proliferation.",
+  "biomarker": "Primary biomarkers included: CD19 expression by immunohistochemistry (IHC) and serum soluble CD19 levels. Secondary biomarkers explored: CD20 expression by IHC, serum soluble CD20 levels, and neutrophil-to-lymphocyte ratio (NLR). Exploratory biomarkers investigated: circulating tumor DNA (ctDNA) for predictive value of response to treatment. Biomarker measurement methods included: IHC, ELISA, and PCR. Validation status: all biomarkers were validated in a separate validation cohort.",
+  "endpoint": "Primary endpoints included: ORR (complete or partial response) assessed by modified International Workshop on Chronic Lymphocytic Leukemia (IWCLL) criteria and PFS assessed by Kaplan-Meier analysis. Secondary endpoints included: safety profile evaluated using adverse event reports, and exploratory biomarkers analyzed for predictive value of response to treatment. Endpoint measurement methods included: clinical assessments, laboratory tests, and imaging studies. Validation status: all endpoints were validated in a separate validation cohort.",
+  "indication": "Target disease/condition: advanced B-cell malignancies, including relapsed or refractory diffuse large B-cell lymphoma (DLBCL), follicular lymphoma (FL), and chronic lymphocytic leukemia/small lymphocytic lymphoma (CLL/SLL). Disease severity/stage: patients with measurable or evaluable disease. Patient population: adults aged 18-75 years with ECOG performance status 0-1. Prior treatment requirements: prior chemotherapy or immunotherapy within 6 months. Disease-specific criteria included: histologically confirmed B-cell malignancies.",
+  "safety": "Known safety concerns: infusion-related reactions, hypersensitivity reactions, and immune-mediated adverse events. Risk factors included: prior treatment with chemotherapy or immunotherapy, ECOG performance status 2-4, and age > 65 years. Safety monitoring plan included: regular clinical assessments, laboratory tests, and imaging studies. Adverse event collection was performed using a standardized adverse event reporting form. Safety stopping rules were established based on predefined criteria for dose reduction or discontinuation of treatment. Risk mitigation strategies included: pre-treatment screening for prior treatment with chemotherapy or immunotherapy, and close monitoring of patients with ECOG performance status 2-4.",
+  "iteration_count": 0
+}
+
