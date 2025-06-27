@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment History - Clinical Trial Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Assessment History</h2>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Document</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in history %}
+                            <tr>
+                                <td>{{ item.date }}</td>
+                                <td>{{ item.filename }}</td>
+                                <td>{{ item.char_count }} characters</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary view-assessment" data-id="{{ item.id }}">
+                                            <i class="bi bi-eye me-1"></i>View
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary export-assessment" data-id="{{ item.id }}">
+                                            <i class="bi bi-download me-1"></i>Export
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-assessment" data-id="{{ item.id }}">
+                                            <i class="bi bi-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <i class="bi bi-inbox display-4 text-muted mb-3"></i>
+                                    <p class="text-muted">No assessment history available</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- assessment view modal -->
+<div class="modal fade" id="assessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assessment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Risk Assessment</h6>
+                                <div id="modalRiskAssessment"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Formatted Review</h6>
+                                <div id="modalFormattedReview"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Suggestions</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Mechanistic</h6>
+                                        <div id="modalMechanisticSuggestions"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Biomarker</h6>
+                                        <div id="modalBiomarkerSuggestions"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Endpoint</h6>
+                                        <div id="modalEndpointSuggestions"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Safety</h6>
+                                        <div id="modalSafetySuggestions"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="exportCurrentAssessment">
+                    <i class="bi bi-download me-1"></i>Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View assessment
+    document.querySelectorAll('.view-assessment').forEach(button => {
+        button.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            try {
+                const response = await fetch(`/api/assessment/${id}`);
+                const data = await response.json();
+                
+                // Populate modal with assessment data
+                document.getElementById('modalRiskAssessment').textContent = data.risk_assessment;
+                document.getElementById('modalFormattedReview').textContent = data.formatted_review;
+                
+                // Populate suggestions
+                document.getElementById('modalMechanisticSuggestions').innerHTML = 
+                    data.mechanistic_suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                document.getElementById('modalBiomarkerSuggestions').innerHTML = 
+                    data.biomarker_suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                document.getElementById('modalEndpointSuggestions').innerHTML = 
+                    data.endpoint_suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                document.getElementById('modalSafetySuggestions').innerHTML = 
+                    data.safety_suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('assessmentModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error loading assessment:', error);
+                alert('Failed to load assessment details');
+            }
+        });
+    });
+
+    // Export assessment
+    document.querySelectorAll('.export-assessment').forEach(button => {
+        button.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            try {
+                const response = await fetch(`/api/assessment/${id}/export`);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `assessment-${id}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (error) {
+                console.error('Error exporting assessment:', error);
+                alert('Failed to export assessment');
+            }
+        });
+    });
+
+    // Delete assessment
+    document.querySelectorAll('.delete-assessment').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to delete this assessment?')) {
+                const id = this.dataset.id;
+                try {
+                    const response = await fetch(`/api/assessment/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        this.closest('tr').remove();
+                    } else {
+                        throw new Error('Failed to delete assessment');
+                    }
+                } catch (error) {
+                    console.error('Error deleting assessment:', error);
+                    alert('Failed to delete assessment');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,120 @@
+{
+  "name": "Proof of Concept",
+  "description": "Template for proof of concept studies",
+  "category": "phase2",
+  "created": "2024-03-01T00:00:00Z",
+  "last_used": null,
+  "content": {
+    "risk_assessment": {
+      "domains": [
+        {
+          "name": "Efficacy",
+          "weight": 0.4,
+          "criteria": [
+            {
+              "name": "Primary Endpoint Selection",
+              "weight": 0.3,
+              "description": "Appropriateness of primary endpoint selection"
+            },
+            {
+              "name": "Sample Size Justification",
+              "weight": 0.3,
+              "description": "Statistical power and sample size justification"
+            },
+            {
+              "name": "Response Criteria",
+              "weight": 0.2,
+              "description": "Clear response criteria definition"
+            },
+            {
+              "name": "Efficacy Monitoring",
+              "weight": 0.2,
+              "description": "Comprehensive efficacy monitoring plan"
+            }
+          ]
+        },
+        {
+          "name": "Safety",
+          "weight": 0.3,
+          "criteria": [
+            {
+              "name": "Safety Profile",
+              "weight": 0.4,
+              "description": "Known safety profile from Phase 1"
+            },
+            {
+              "name": "Risk Management",
+              "weight": 0.3,
+              "description": "Risk management and mitigation strategies"
+            },
+            {
+              "name": "Safety Monitoring",
+              "weight": 0.3,
+              "description": "Long-term safety monitoring plan"
+            }
+          ]
+        },
+        {
+          "name": "Biomarkers",
+          "weight": 0.3,
+          "criteria": [
+            {
+              "name": "Biomarker Validation",
+              "weight": 0.4,
+              "description": "Validation status of selected biomarkers"
+            },
+            {
+              "name": "Sampling Strategy",
+              "weight": 0.3,
+              "description": "Biomarker sampling strategy"
+            },
+            {
+              "name": "Analysis Plan",
+              "weight": 0.3,
+              "description": "Biomarker analysis and interpretation plan"
+            }
+          ]
+        }
+      ]
+    },
+    "suggestions": {
+      "mechanistic": [
+        "Include exploratory biomarker assessments",
+        "Evaluate dose-response relationships",
+        "Assess impact of patient characteristics"
+      ],
+      "biomarker": [
+        "Include predictive biomarkers",
+        "Consider pharmacodynamic markers",
+        "Evaluate potential surrogate endpoints"
+      ],
+      "endpoint": [
+        "Define clear efficacy endpoints",
+        "Include quality of life measures",
+        "Consider composite endpoints"
+      ],
+      "safety": [
+        "Implement comprehensive safety monitoring",
+        "Define clear stopping rules",
+        "Include long-term safety assessments"
+      ]
+    },
+    "evidence_requirements": {
+      "preclinical": [
+        "Mechanism of action data",
+        "Efficacy data in relevant models",
+        "Safety data from chronic studies"
+      ],
+      "clinical": [
+        "Phase 1 study results",
+        "Proof of concept study protocol",
+        "Statistical analysis plan"
+      ],
+      "regulatory": [
+        "Protocol amendments",
+        "Safety updates",
+        "Interim analysis plan"
+      ]
+    }
+  }
+} 

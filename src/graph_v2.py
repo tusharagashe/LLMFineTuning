@@ -44,6 +44,11 @@ class Workflow:
         model_config = LLM_CONFIGS[model_name]["model"]
         if model_name == "llama3.2":
             self.llm = ChatOllama(model=model_config)
+        elif model_name == "gpt-4o":
+            self.llm = ChatOpenAI(
+                model=model_config,
+                api_key=LLM_CONFIGS[model_name]["api_key"]
+            )
         # self.llm = self.llm_base.with_structured_output(State)
         self.risk_assessor_llm = self.llm.with_structured_output(RiskAssessmentFeedback)
         self.de_risker_llm = self.llm.with_structured_output(DeRiskerFeedback)
@@ -57,6 +62,7 @@ class Workflow:
             fetch_opentargets_associations,
             fetch_trials_in_literature,
         ]
+        self.memory = None
 
     def evidence_retriever(self, state: State, config: RunnableConfig) -> dict:
         """
