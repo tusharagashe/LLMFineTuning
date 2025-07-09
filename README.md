@@ -7,7 +7,7 @@ Our project aimed to build an agentic workflow that de-risks development by anal
 ## Workflow
 ![LLM Fine-Tuning Workflow](LLMFineTuningWorkflow.png)
 
-RAG Componets 
+RAG Components
 
 API Tools
 - NIH ClinicalTrials.gov
@@ -26,3 +26,5 @@ Limitations
 
 Future Directions
 to come...
+
+Using through Frontend
