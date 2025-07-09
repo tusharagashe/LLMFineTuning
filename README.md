@@ -7,5 +7,22 @@ Our project aimed to build an agentic workflow that de-risks development by anal
 ## Workflow
 ![LLM Fine-Tuning Workflow](LLMFineTuningWorkflow.png)
 
+RAG Componets 
+
+API Tools
+- NIH ClinicalTrials.gov
+- OpenFDA
+- Europe PMC
+- Open Targets
+
+Agentic Workflow
+
+Output Evaluation
+
 ## Example Output
 ![LLM Fine-Tuning Example Output](LLMFineTuningExampleOutput.png)
+
+Limitations
+
+Future Directions
+to come...
