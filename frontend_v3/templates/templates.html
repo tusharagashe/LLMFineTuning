@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Templates - Clinical Trial Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Templates</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTemplateModal">
+                <i class="bi bi-plus-lg me-2"></i>New Template
+            </button>
+        </div>
+
+        <!-- template categories -->
+        <div class="row g-4">
+            <!-- phase 1 templates -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-1-circle me-2"></i>Phase 1
+                        </h5>
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">First-in-Human</h6>
+                                    <small class="text-muted">Last used: 2 days ago</small>
+                                </div>
+                                <p class="mb-1 text-muted">Template for first-in-human clinical trials</p>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Dose Escalation</h6>
+                                    <small class="text-muted">Last used: 1 week ago</small>
+                                </div>
+                                <p class="mb-1 text-muted">Template for dose escalation studies</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- phase 2 templates -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-2-circle me-2"></i>Phase 2
+                        </h5>
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Proof of Concept</h6>
+                                    <small class="text-muted">Last used: 3 days ago</small>
+                                </div>
+                                <p class="mb-1 text-muted">Template for proof of concept studies</p>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Dose Finding</h6>
+                                    <small class="text-muted">Last used: 2 weeks ago</small>
+                                </div>
+                                <p class="mb-1 text-muted">Template for dose finding studies</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- phase 3 templates -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-3-circle me-2"></i>Phase 3
+                        </h5>
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Pivotal</h6>
+                                    <small class="text-muted">Last used: 1 day ago</small>
+                                </div>
+                                <p class="mb-1 text-muted">Template for pivotal studies</p>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Confirmatory</h6>
+                                    <small class="text-muted">Last used: 5 days ago</small>
+                                </div>
+                                <p class="mb-1 text-muted">Template for confirmatory studies</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- custom templates -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-stars me-2"></i>Custom Templates
+                </h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>Last Used</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Oncology Phase 1</td>
+                                <td>Custom template for oncology Phase 1 trials</td>
+                                <td>2024-02-15</td>
+                                <td>2024-03-01</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Pediatric Safety</td>
+                                <td>Template for pediatric safety studies</td>
+                                <td>2024-02-20</td>
+                                <td>2024-02-28</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- new template modal -->
+<div class="modal fade" id="newTemplateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newTemplateForm">
+                    <div class="mb-3">
+                        <label for="templateName" class="form-label">Template Name</label>
+                        <input type="text" class="form-control" id="templateName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="templateDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="templateDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="templateCategory" class="form-label">Category</label>
+                        <select class="form-select" id="templateCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="phase1">Phase 1</option>
+                            <option value="phase2">Phase 2</option>
+                            <option value="phase3">Phase 3</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="templateFile" class="form-label">Base Template File</label>
+                        <input type="file" class="form-control" id="templateFile">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveTemplate">Save Template</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Save template
+    document.getElementById('saveTemplate').addEventListener('click', async function() {
+        const form = document.getElementById('newTemplateForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', document.getElementById('templateName').value);
+        formData.append('description', document.getElementById('templateDescription').value);
+        formData.append('category', document.getElementById('templateCategory').value);
+        
+        const fileInput = document.getElementById('templateFile');
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        try {
+            const response = await fetch('/api/templates', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('newTemplateModal'));
+                modal.hide();
+                // Refresh the page or update the template list
+                location.reload();
+            } else {
+                throw new Error('Failed to save template');
+            }
+        } catch (error) {
+            console.error('Error saving template:', error);
+            alert('Failed to save template');
+        }
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,159 @@
+{
+  "filename": "failed_ct.pdf",
+  "upload_time": "2025-06-05T19:41:02.434999",
+  "formatted_document": {
+    "trial_phase": "Phase 3",
+    "trial_design": "Randomized, double-blind, placebo-controlled",
+    "treatment_arms": [
+      {
+        "arm_name": "Tanezumab",
+        "dosing": "Subcutaneous injection every 4 weeks for 52 weeks"
+      },
+      {
+        "arm_name": "Placebo",
+        "dosing": "Subcutaneous injection every 4 weeks for 52 weeks"
+      }
+    ],
+    "sample_size": "300 participants",
+    "randomization": "Stratified randomization by disease severity and prior treatment history",
+    "study_duration": "52 weeks",
+    "follow_up": [
+      {
+        "time_point": "24 weeks",
+        "assessment": "Change from baseline in joint pain and function"
+      },
+      {
+        "time_point": "48 weeks",
+        "assessment": "Change from baseline in joint pain and function"
+      }
+    ],
+    "inclusion_criteria": [
+      {
+        "age": ">18 years",
+        "disease_severity": "Moderate to severe osteoarthritis",
+        "prior_treatment": "Failed or intolerant to prior osteoarthritis treatments"
+      },
+      {
+        "comorbidities": "None",
+        "contraindications": "None"
+      }
+    ],
+    "exclusion_criteria": [
+      {
+        "age": "<18 years",
+        "disease_severity": "Mild osteoarthritis",
+        "prior_treatment": "Current treatment with a different osteoarthritis medication"
+      },
+      {
+        "comorbidities": "Diabetes, hypertension, or kidney disease",
+        "contraindications": "None"
+      }
+    ],
+    "primary_objectives": [
+      {
+        "endpoint": "Change from baseline in joint pain and function",
+        "definition": "Patient-reported outcomes using the OARSI-OMERACT osteoarthritis outcome measure",
+        "measurement_method": "Patient diary and clinical assessments",
+        "validation_status": "Validated"
+      },
+      {
+        "endpoint": "Change from baseline in radiographic joint space narrowing",
+        "definition": "Assessment of joint space narrowing using X-ray imaging",
+        "measurement_method": "Centralized radiographic assessment",
+        "validation_status": "Validated"
+      }
+    ],
+    "mechanism": "Tanezumab targets and inhibits the RhoA/Rho kinase pathway, leading to reduced inflammation and pain in osteoarthritis joints.",
+    "biomarker": [
+      {
+        "primary_biomarkers": [
+          "OARSI-OMERACT osteoarthritis outcome measure",
+          "Joint space narrowing"
+        ]
+      },
+      {
+        "secondary_biomarkers": [
+          "C-reactive protein (CRP)",
+          "Erythrocyte sedimentation rate (ESR)"
+        ],
+        "exploratory_biomarkers": [
+          "Fibroblast growth factor 23 (FGF-23)"
+        ]
+      }
+    ],
+    "endpoint": [
+      {
+        "primary_endpoints": [
+          {
+            "endpoint": "Change from baseline in joint pain and function",
+            "definition": "Patient-reported outcomes using the OARSI-OMERACT osteoarthritis outcome measure"
+          },
+          {
+            "endpoint": "Change from baseline in radiographic joint space narrowing",
+            "definition": "Assessment of joint space narrowing using X-ray imaging"
+          }
+        ],
+        "secondary_endpoints": [
+          {
+            "endpoint": "Change from baseline in CRP levels",
+            "definition": "Assessment of inflammatory biomarkers"
+          },
+          {
+            "endpoint": "Change from baseline in ESR levels",
+            "definition": "Assessment of inflammatory biomarkers"
+          }
+        ],
+        "exploratory_endpoints": [
+          {
+            "endpoint": "Change from baseline in FGF-23 levels",
+            "definition": "Assessment of fibroblast growth factor 23 (FGF-23) levels"
+          }
+        ]
+      },
+      {
+        "measurement_method": "Patient diary and clinical assessments",
+        "validation_status": "Validated"
+      },
+      {
+        "measurement_method": "Centralized radiographic assessment",
+        "validation_status": "Validated"
+      }
+    ],
+    "indication": [
+      {
+        "target_disease": "Osteoarthritis of the knee or hip joint",
+        "disease_severity": "Moderate to severe osteoarthritis",
+        "patient_population": "Adults with moderate to severe osteoarthritis"
+      },
+      {
+        "prior_treatment_requirements": "Failed or intolerant to prior osteoarthritis treatments",
+        "disease_specific_criteria": "Osteoarthritis of the knee or hip joint, as defined by the OARSI-OMERACT osteoarthritis outcome measure"
+      }
+    ],
+    "safety": [
+      {
+        "known_safety_concerns": [
+          "Injection site reactions",
+          "Hypersensitivity reactions"
+        ],
+        "risk_factors": [
+          "History of hypersensitivity reactions to monoclonal antibodies"
+        ],
+        "safety_monitoring_plan": "Regular monitoring of injection site reactions and hypersensitivity reactions",
+        "adverse_event_collection": "Patient-reported adverse events and clinical assessments"
+      },
+      {
+        "safety_stopping_rules": [
+          {
+            "rule": "Severe hypersensitivity reaction or anaphylaxis",
+            "stopping_condition": "Immediate discontinuation of treatment"
+          }
+        ],
+        "risk_mitigation_strategies": [
+          "Use of antihistamines and corticosteroids for injection site reactions"
+        ]
+      }
+    ]
+  },
+  "chat_history": []
+}

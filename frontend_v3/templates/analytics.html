@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Clinical Trial Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Analytics Dashboard</h2>
+        
+        <!-- summary cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Total Assessments</h6>
+                        <h2 class="card-title mb-0">{{ data.total_assessments }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Average Risk Score</h6>
+                        <h2 class="card-title mb-0">{{ "%.2f"|format(data.average_risk_score) }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Common Risks</h6>
+                        <h2 class="card-title mb-0">{{ data.common_risks|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Success Rate</h6>
+                        <h2 class="card-title mb-0">85%</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- charts -->
+        <div class="row g-4">
+            <!-- risk distribution chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Risk Distribution</h5>
+                        <canvas id="riskDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- assessment trends chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Assessment Trends</h5>
+                        <canvas id="assessmentTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- common risks table -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Common Risks</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Risk Type</th>
+                                        <th>Frequency</th>
+                                        <th>Severity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for risk in data.common_risks %}
+                                    <tr>
+                                        <td>{{ risk.type }}</td>
+                                        <td>{{ risk.frequency }}</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-{{ risk.severity_color }}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ risk.severity }}%">
+                                                    {{ risk.severity }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- recent assessments -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Assessments</h5>
+                        <div class="list-group">
+                            {% for trend in data.assessment_trends %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ trend.title }}</h6>
+                                    <small>{{ trend.date }}</small>
+                                </div>
+                                <p class="mb-1">{{ trend.description }}</p>
+                                <small class="text-muted">Risk Score: {{ trend.risk_score }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // risk distribution chart
+    const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+    new Chart(riskCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Mechanistic', 'Biomarker', 'Endpoint', 'Safety'],
+            datasets: [{
+                data: [30, 25, 20, 25],
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a',
+                    '#36b9cc',
+                    '#f6c23e'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // assessment trends chart
+    const trendsCtx = document.getElementById('assessmentTrendsChart').getContext('2d');
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Assessments',
+                data: [12, 19, 15, 17, 22, 25],
+                borderColor: '#4e73df',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

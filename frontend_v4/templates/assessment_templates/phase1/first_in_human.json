@@ -1,0 +1,120 @@
+{
+  "name": "First-in-Human",
+  "description": "Template for first-in-human clinical trials",
+  "category": "phase1",
+  "created": "2024-03-01T00:00:00Z",
+  "last_used": null,
+  "content": {
+    "risk_assessment": {
+      "domains": [
+        {
+          "name": "Safety",
+          "weight": 0.4,
+          "criteria": [
+            {
+              "name": "Preclinical Safety Data",
+              "weight": 0.3,
+              "description": "Quality and completeness of preclinical safety data"
+            },
+            {
+              "name": "Starting Dose Selection",
+              "weight": 0.3,
+              "description": "Scientific rationale for starting dose selection"
+            },
+            {
+              "name": "Dose Escalation Scheme",
+              "weight": 0.2,
+              "description": "Appropriateness of dose escalation scheme"
+            },
+            {
+              "name": "Safety Monitoring",
+              "weight": 0.2,
+              "description": "Comprehensive safety monitoring plan"
+            }
+          ]
+        },
+        {
+          "name": "Pharmacokinetics",
+          "weight": 0.3,
+          "criteria": [
+            {
+              "name": "PK Sampling Schedule",
+              "weight": 0.4,
+              "description": "Comprehensive PK sampling schedule"
+            },
+            {
+              "name": "Food Effect",
+              "weight": 0.3,
+              "description": "Assessment of food effect on PK"
+            },
+            {
+              "name": "Metabolite Profiling",
+              "weight": 0.3,
+              "description": "Metabolite profiling and identification"
+            }
+          ]
+        },
+        {
+          "name": "Pharmacodynamics",
+          "weight": 0.3,
+          "criteria": [
+            {
+              "name": "Biomarker Selection",
+              "weight": 0.4,
+              "description": "Appropriate biomarker selection and validation"
+            },
+            {
+              "name": "PD Sampling",
+              "weight": 0.3,
+              "description": "PD sampling schedule and methodology"
+            },
+            {
+              "name": "Response Assessment",
+              "weight": 0.3,
+              "description": "Early response assessment criteria"
+            }
+          ]
+        }
+      ]
+    },
+    "suggestions": {
+      "mechanistic": [
+        "Consider including exploratory biomarker assessments",
+        "Evaluate potential drug-drug interactions",
+        "Assess impact of food on drug absorption"
+      ],
+      "biomarker": [
+        "Include safety biomarkers for early toxicity detection",
+        "Consider PD biomarkers for target engagement",
+        "Evaluate potential surrogate endpoints"
+      ],
+      "endpoint": [
+        "Define clear safety endpoints",
+        "Include PK endpoints for dose selection",
+        "Consider exploratory efficacy endpoints"
+      ],
+      "safety": [
+        "Implement comprehensive safety monitoring",
+        "Define clear stopping rules",
+        "Include cardiac safety assessments"
+      ]
+    },
+    "evidence_requirements": {
+      "preclinical": [
+        "Complete toxicology studies",
+        "Pharmacokinetic data in relevant species",
+        "Safety pharmacology data"
+      ],
+      "clinical": [
+        "First-in-human study protocol",
+        "Investigator's brochure",
+        "Informed consent form"
+      ],
+      "regulatory": [
+        "IND/CTA submission documents",
+        "Ethics committee approval",
+        "Regulatory authority approval"
+      ]
+    }
+  }
+} 

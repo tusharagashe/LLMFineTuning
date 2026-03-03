@@ -55,7 +55,7 @@ def main():
     )
     parser.add_argument(
         "--collection",
-        default="risk_chunks",
+        default="fda_chunks",
         help="milvus collection name to search, default is set to 'risk_chunks'",
     )
     parser.add_argument("--query", required=True, help="Search query")

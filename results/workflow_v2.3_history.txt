@@ -1,0 +1,7 @@
+*********************************************************************
+()
+====Retrieved Evidence======
+['Lebrikizumab failed Phase 3 for asthma (NCT02918071) due to weak correlation of AER with symptom control.', 'Dupilumab succeeded in similar eosinophilic population with endpoint of FEV1 + biomarker stratification (BLA761469).']
+====User Proposal======
+This is a Phase 3 randomized, double-blind, placebo-controlled trial evaluating the analgesic efficacy and safety of tanezumab (2.5 mg and 5 mg) administered subcutaneously every 8 weeks in patients with osteoarthritis of the hip or knee. The study includes co-primary endpoints based on the WOMAC Pain subscale, WOMAC Physical Function subscale, and Patient's Global Assessment of Osteoarthritis at 24 weeks. Approximately 810 subjects are randomized in a 1:1:1 ratio to tanezumab 2.5 mg, 5 mg, or placebo. Subjects will receive three doses over 24 weeks. Safety concerns include rapidly progressive osteoarthritis, joint deterioration, and neurological adverse events.
+====Risk Assessment and Rating======

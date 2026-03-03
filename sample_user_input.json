@@ -1,0 +1,37 @@
+{
+    "project_name": "Anti-IL13 Monoclonal Antibody for Severe Asthma",
+    "submission_stage": "Pre-IND",
+    "proposal": {
+      "indication": "Severe eosinophilic asthma in adults who are unresponsive to inhaled corticosteroids and long-acting beta agonists.",
+      "mechanism_of_action": "Fully human IgG1 monoclonal antibody that binds interleukin-13 (IL-13), blocking downstream signaling involved in airway inflammation and mucus hypersecretion.",
+      "preclinical_summary": {
+        "efficacy_models": ["Ovalbumin-sensitized mouse model", "House dust mite challenge in non-human primates"],
+        "toxicology": "6-month NHP GLP tox study complete; no major adverse events",
+        "immunogenicity": "Low ADA incidence in NHP; human risk unclear"
+      },
+      "trial_design": {
+        "phase": "Phase 2",
+        "population": "Adults aged 18–65 with eosinophilic asthma (≥300 eos/µL)",
+        "arms": [
+          "Placebo",
+          "Anti-IL13 low dose (75 mg SC q4w)",
+          "Anti-IL13 high dose (150 mg SC q4w)"
+        ],
+        "primary_endpoint": "Annualized asthma exacerbation rate at 52 weeks",
+        "secondary_endpoints": ["FEV1 change from baseline", "ACQ-7 improvement"]
+      },
+      "manufacturing_summary": {
+        "expression_system": "CHO cells",
+        "purification": "Protein A + ion-exchange chromatography",
+        "stability": "24 months at 4°C; stress tests ongoing"
+      }
+    },
+    "available_resources": {
+      "timeline": "18 months to Phase 3 go/no-go",
+      "budget": "Moderate",
+      "preexisting_data": ["IgE suppression with anti-IL13 analog", "Human IL13 biomarker studies"],
+      "regulatory_strategy": "Plan to request fast track designation"
+    },
+    "request": "Run full multi-agent de-risking evaluation. I want to identify regulatory, scientific, and trial design risks and generate mitigation strategies based on prior FDA outcomes and mAb precedents."
+  }
+  
